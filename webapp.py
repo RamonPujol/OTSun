@@ -103,14 +103,14 @@ def node(name, identifier=None):
         data = request.form.to_dict()
         if identifier is None:
             identifier = str(uuid4())
-        fileids = request.files
-        for fileid in fileids:
-            the_file = request.files[fileid]
+        file_ids = request.files
+        for file_id in file_ids:
+            the_file = request.files[file_id]
             if the_file and the_file.filename != "":
                 filename = the_file.filename
                 filename = secure_filename(filename)
                 save_file(the_file, identifier, filename)
-                data[fileid] = filename
+                data[file_id] = filename
         save_data(data, identifier)
         if 'next_step' in data:
             return redirect('node/' + data['next_step'] + '/' + identifier)
