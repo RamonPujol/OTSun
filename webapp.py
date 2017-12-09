@@ -4,16 +4,19 @@ from uuid import uuid4
 import os
 import json
 import smtplib
-from email.MIMEMultipart import MIMEMultipart
-from email.MIMEText import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 import threading
 from time import sleep
 from werkzeug.utils import secure_filename
 from processing_unit import process_input
+import logging
+from logging.handlers import RotatingFileHandler
 
 app = Flask(__name__)
 
 UPLOAD_FOLDER = '/tmp/WebAppSunScene'
+LOG_FILE = os.path.join(UPLOAD_FOLDER,'webapp.log')
 URL_ROOT = None
 
 
@@ -88,6 +91,7 @@ def process_request(identifier):
 
 @app.route('/')
 def hello():
+    app.logger.info("Processing root")
     global URL_ROOT
     if URL_ROOT is None:
         URL_ROOT = request.url_root
@@ -97,6 +101,10 @@ def hello():
 @app.route('/node/<name>/<identifier>', methods=['GET', 'POST'])
 @app.route('/node/<name>', methods=['GET', 'POST'])
 def node(name, identifier=None):
+    if identifier:
+        app.logger.info("Processing %s/%s", name, identifier)
+    else:
+        app.logger.info("Processing %s ", name)
     if request.method == 'GET':
         return render_template(name + ".html", identifier=identifier)
     if request.method == 'POST':
@@ -109,6 +117,7 @@ def node(name, identifier=None):
             if the_file and the_file.filename != "":
                 filename = the_file.filename
                 filename = secure_filename(filename)
+                app.logger.debug("filename is %s", filename)
                 save_file(the_file, identifier, filename)
                 data[file_id] = filename
         save_data(data, identifier)
@@ -120,6 +129,10 @@ def node(name, identifier=None):
 
 @app.route('/end/<identifier>')
 def end_process(identifier):
+    if identifier:
+        app.logger.info("Processing end/%s", identifier)
+    else:
+        app.logger.info("Processing end ")
     global URL_ROOT
     if URL_ROOT is None:
         URL_ROOT = request.url_root
@@ -131,10 +144,20 @@ def end_process(identifier):
 @app.route('/results/<identifier>', methods=['GET'])
 @app.route('/results/')
 def send_file(identifier=None):
+    if identifier:
+        app.logger.info("Requesting results of %s", identifier)
+    else:
+        app.logger.info("Requesting results")
     if identifier is None:
         return "No process job specified"
     return send_from_directory(UPLOAD_FOLDER, identifier + '.output')
 
 
 if __name__ == '__main__':
+    formatter = logging.Formatter(
+        "[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s")
+    handler = RotatingFileHandler(LOG_FILE, maxBytes=1000000, backupCount=5)
+    handler.setLevel(logging.INFO)
+    handler.setFormatter(formatter)
+    app.logger.addHandler(handler)
     app.run(host='0.0.0.0', port=5002, threaded=True)
