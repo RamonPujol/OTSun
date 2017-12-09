@@ -9,7 +9,7 @@ from email.MIMEText import MIMEText
 import threading
 from time import sleep
 from werkzeug.utils import secure_filename
-import io
+from processing_unit import process_input
 
 app = Flask(__name__)
 
@@ -76,20 +76,13 @@ def send_mail(toaddr, identifier):
 
 
 def process_request(identifier):
-    # Get data
-    data = load_data(identifier)
-    # Do the work
+    # Call the processing unit
     sleep(1)
     dirname = files_folder(identifier)
-    destfile = dirname+'.output'
-    with io.open(destfile, 'w', encoding='utf8') as fp:
-        fp.write("Data given:\n")
-        for key in data:
-            fp.write("%s: %s\n" % (key, data[key]))
-        fp.write("Uploaded files:\n")
-        for uploaded_filename in os.listdir(dirname):
-            fp.write("%s\n" % (uploaded_filename,))
+    datafile = json_file(identifier)
+    process_input(datafile, dirname)
     # Send mail with link
+    data = load_data(identifier)
     send_mail(toaddr=data['email'], identifier=identifier)
 
 
