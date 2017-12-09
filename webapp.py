@@ -9,44 +9,43 @@ from email.MIMEText import MIMEText
 import threading
 from time import sleep
 from werkzeug.utils import secure_filename
+import io
 
 app = Flask(__name__)
 
-UPLOAD_FOLDER = '/tmp'
+UPLOAD_FOLDER = '/tmp/WebAppSunScene'
 URL_ROOT = None
 
 
-def save_data(data, identifier):
-    dirname = os.path.join(UPLOAD_FOLDER, identifier)
-    if not os.path.exists(dirname):
-        os.makedirs(dirname)
-    filename = os.path.join(dirname, 'data.txt')
-    try:
-        with open(filename, 'r') as fp:
-            saved_data = json.load(fp)
-    except IOError:
-        saved_data = {}
-    saved_data.update(data)
-    with open(filename, 'w') as fp:
-        json.dump(saved_data, fp)
+def files_folder(identifier):
+    folder = os.path.join(UPLOAD_FOLDER, identifier)
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    return folder
 
 
-def save_file(the_file, identifier, filename):
-    dirname = os.path.join(UPLOAD_FOLDER, identifier)
-    if not os.path.exists(dirname):
-        os.makedirs(dirname)
-    the_file.save(os.path.join(dirname, filename))
+def json_file(identifier):
+    return files_folder(identifier)+'.json'
 
 
 def load_data(identifier):
-    dirname = os.path.join(UPLOAD_FOLDER, identifier)
-    filename = os.path.join(dirname, 'data.txt')
     try:
-        with open(filename, 'r') as fp:
+        with open(json_file(identifier), 'r') as fp:
             saved_data = json.load(fp)
     except IOError:
         saved_data = {}
     return saved_data
+
+
+def save_data(data, identifier):
+    saved_data = load_data(identifier)
+    saved_data.update(data)
+    with open(json_file(identifier), 'w') as fp:
+        json.dump(saved_data, fp)
+
+
+def save_file(the_file, identifier, filename):
+    the_file.save(os.path.join(files_folder(identifier), filename))
 
 
 def send_mail(toaddr, identifier):
@@ -81,13 +80,15 @@ def process_request(identifier):
     data = load_data(identifier)
     # Do the work
     sleep(1)
-    dirname = os.path.join(UPLOAD_FOLDER, identifier)
-    destfile = os.path.join(UPLOAD_FOLDER, identifier+'.output')
-    with open(destfile, 'w') as fp:
+    dirname = files_folder(identifier)
+    destfile = dirname+'.output'
+    with io.open(destfile, 'w', encoding='utf8') as fp:
+        fp.write("Data given:\n")
         for key in data:
             fp.write("%s: %s\n" % (key, data[key]))
+        fp.write("Uploaded files:\n")
         for uploaded_filename in os.listdir(dirname):
-            fp.write("File %s\n" % (uploaded_filename,))
+            fp.write("%s\n" % (uploaded_filename,))
     # Send mail with link
     send_mail(toaddr=data['email'], identifier=identifier)
 
@@ -112,10 +113,11 @@ def node(name, identifier=None):
         fileids = request.files
         for fileid in fileids:
             the_file = request.files[fileid]
-            filename = the_file.filename
-            filename = secure_filename(filename)
-            save_file(the_file, identifier, filename)
-            data[fileid] = filename
+            if the_file and the_file.filename != "":
+                filename = the_file.filename
+                filename = secure_filename(filename)
+                save_file(the_file, identifier, filename)
+                data[fileid] = filename
         save_data(data, identifier)
         if 'next_step' in data:
             return redirect('node/' + data['next_step'] + '/' + identifier)
@@ -125,6 +127,9 @@ def node(name, identifier=None):
 
 @app.route('/end/<identifier>')
 def end_process(identifier):
+    global URL_ROOT
+    if URL_ROOT is None:
+        URL_ROOT = request.url_root
     compute_thread = threading.Thread(target=process_request, args=(identifier,))
     compute_thread.start()
     return render_template("end.html")
