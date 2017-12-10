@@ -6,5 +6,4 @@ apt-get install -y freecad
 apt-get install -y python-numpy
 apt-get install -y python-enum
 apt-get install -y python-pip
-pip install flask
 

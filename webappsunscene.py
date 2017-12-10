@@ -16,8 +16,18 @@ from logging.handlers import RotatingFileHandler
 app = Flask(__name__)
 
 UPLOAD_FOLDER = '/tmp/WebAppSunScene'
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
 LOG_FILE = os.path.join(UPLOAD_FOLDER,'webapp.log')
 URL_ROOT = None
+
+
+formatter = logging.Formatter(
+    "[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s")
+handler = RotatingFileHandler(LOG_FILE, maxBytes=1000000, backupCount=5)
+handler.setLevel(logging.INFO)
+handler.setFormatter(formatter)
+app.logger.addHandler(handler)
 
 
 def files_folder(identifier):
@@ -154,10 +164,4 @@ def send_file(identifier=None):
 
 
 if __name__ == '__main__':
-    formatter = logging.Formatter(
-        "[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s")
-    handler = RotatingFileHandler(LOG_FILE, maxBytes=1000000, backupCount=5)
-    handler.setLevel(logging.INFO)
-    handler.setFormatter(formatter)
-    app.logger.addHandler(handler)
     app.run(host='0.0.0.0', port=5002, threaded=True)

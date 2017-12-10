@@ -1,0 +1,10 @@
+# install at /etc/nginx/sites-available
+server {
+    listen 80;
+    server_name 0.0.0.0;
+
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:/home/simpleuser/webappsunsceneproject/webappsunscene.sock;
+    }
+}
