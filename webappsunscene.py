@@ -105,7 +105,7 @@ def hello():
     global URL_ROOT
     if URL_ROOT is None:
         URL_ROOT = request.url_root
-    return redirect('/node/start')
+    return redirect('node/start')
 
 
 @app.route('/node/<name>/<identifier>', methods=['GET', 'POST'])

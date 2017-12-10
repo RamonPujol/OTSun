@@ -2,3 +2,7 @@ seguir:
 https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-gunicorn-and-nginx-on-ubuntu-16-04
 
 fer servir un usuari nou (simpleuser) que sera el propietari de tot
+
+
+ULL!!!! passar a uwsgi: http://flask.pocoo.org/docs/0.12/deploying/uwsgi/
+https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-uwsgi-and-nginx-on-ubuntu-16-04
