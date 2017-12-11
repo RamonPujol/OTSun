@@ -1,7 +1,6 @@
 # this goes in /etc/apache2/sites-available/
 <VirtualHost *:80>
-    ServerName localhost
-
+	ServerName 130.206.30.60
     # logs configuration
     LogLevel info
     ErrorLog ${APACHE_LOG_DIR}/error.log

@@ -4,3 +4,4 @@ venv
 .vagrant
 *.pyc
 venv_vagrant
+dummy

@@ -75,5 +75,7 @@ Vagrant.configure("2") do |config|
   #   apt-get install -y apache2
   # SHELL
   config.vm.provision :shell, path: "bootstrap.sh"
+  config.vm.provision :shell, privileged: false, path: "bootstrap_user.sh"
+  config.vm.provision :shell, path: "bootstrap_server.sh"
 ###  config.vm.provision :shell, path: "runserver.sh", run: "always"
 end

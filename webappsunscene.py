@@ -11,23 +11,25 @@ from time import sleep
 from werkzeug.utils import secure_filename
 from processing_unit import process_input
 import logging
-from logging.handlers import RotatingFileHandler
 
 app = Flask(__name__)
 
 UPLOAD_FOLDER = '/tmp/WebAppSunScene'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
-LOG_FILE = os.path.join(UPLOAD_FOLDER,'webapp.log')
+else:
+    if not os.access(UPLOAD_FOLDER, os.W_OK):
+        UPLOAD_FOLDER += str(uuid4())
+        os.makedirs(UPLOAD_FOLDER)
 URL_ROOT = None
 
 
-formatter = logging.Formatter(
-    "[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s")
-handler = RotatingFileHandler(LOG_FILE, maxBytes=1000000, backupCount=5)
-handler.setLevel(logging.INFO)
-handler.setFormatter(formatter)
-app.logger.addHandler(handler)
+# formatter = logging.Formatter(
+#     "[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s")
+# handler = RotatingFileHandler(LOG_FILE, maxBytes=1000000, backupCount=5)
+# handler.setLevel(logging.INFO)
+# handler.setFormatter(formatter)
+# logging.addHandler(handler)
 
 
 def files_folder(identifier):
@@ -101,7 +103,7 @@ def process_request(identifier):
 
 @app.route('/')
 def hello():
-    app.logger.info("Processing root")
+    logging.info("Processing root")
     global URL_ROOT
     if URL_ROOT is None:
         URL_ROOT = request.url_root
@@ -112,9 +114,9 @@ def hello():
 @app.route('/node/<name>', methods=['GET', 'POST'])
 def node(name, identifier=None):
     if identifier:
-        app.logger.info("Processing %s/%s", name, identifier)
+        logging.info("Processing %s/%s", name, identifier)
     else:
-        app.logger.info("Processing %s ", name)
+        logging.info("Processing %s ", name)
     if request.method == 'GET':
         return render_template(name + ".html", identifier=identifier)
     if request.method == 'POST':
@@ -127,7 +129,7 @@ def node(name, identifier=None):
             if the_file and the_file.filename != "":
                 filename = the_file.filename
                 filename = secure_filename(filename)
-                app.logger.debug("filename is %s", filename)
+                logging.debug("filename is %s", filename)
                 save_file(the_file, identifier, filename)
                 data[file_id] = filename
         save_data(data, identifier)
@@ -140,9 +142,9 @@ def node(name, identifier=None):
 @app.route('/end/<identifier>')
 def end_process(identifier):
     if identifier:
-        app.logger.info("Processing end/%s", identifier)
+        logging.info("Processing end/%s", identifier)
     else:
-        app.logger.info("Processing end ")
+        logging.info("Processing end ")
     global URL_ROOT
     if URL_ROOT is None:
         URL_ROOT = request.url_root
@@ -155,9 +157,9 @@ def end_process(identifier):
 @app.route('/results/')
 def send_file(identifier=None):
     if identifier:
-        app.logger.info("Requesting results of %s", identifier)
+        logging.info("Requesting results of %s", identifier)
     else:
-        app.logger.info("Requesting results")
+        logging.info("Requesting results")
     if identifier is None:
         return "No process job specified"
     return send_from_directory(UPLOAD_FOLDER, identifier + '.output')
