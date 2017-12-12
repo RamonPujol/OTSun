@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>WebAppSunScene</h1>
     <form method="post">
         <!-- <input type="hidden" name="next_step" value="a1"> -->
       <div class="form-group">
@@ -9,14 +8,17 @@
         <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email" name="email">
         <small id="emailHelp" class="form-text text-muted">We need it to send you the results of the computation. We'll never share your email with anyone else.</small>
       </div>
+
       <div class="form-group">
         <label for="experimentToRun">Experiment to run:</label><br>
-        <select id="experimentToRun" name="next_step" class="selectpicker" title="Choose the experiment to run.">
+        <select id="experimentToRun" name="next_step" class="form-control" title="Choose the experiment to run.">
+            <option selected disabled>Choose one</option>
             <option value="experiment1">First Experiment</option>
             <option value="experiment2">Second Experiment</option>
         </select>
       </div>
       <button type="submit" class="btn btn-primary">Submit</button>
+
     </form>
 
 {% endblock %}

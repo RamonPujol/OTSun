@@ -1,6 +1,26 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>WebAppSunScene</h1>
-    Not yet implemented. Sorry!
+    I will just log your input...
+        <form method=post enctype=multipart/form-data>
+        <input type="hidden" name="next_step" value="confirm">
+        <input type="hidden" name="experiment" value="dummy">
+
+        <div class="form-group">
+            <label for="lambda1">Initial lambda</label>
+            <input type="text" class="form-control" id="lambda1" placeholder="Parameter" name="lambda1">
+        </div>
+
+        <div class="form-group">
+            <label for="lambda2">Final lambda</label>
+            <input type="text" class="form-control" id="lambda2" placeholder="Parameter" name="lambda2">
+        </div>
+
+        <div class="form-group">
+            <label for="lambda3">Step lambda</label>
+            <input type="text" class="form-control" id="lambda3" placeholder="Parameter" name="lambdadelta">
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+
 {% endblock %}
