@@ -8,20 +8,17 @@ import FreeCAD
 import raytrace
 import numpy as np
 import time
+import shutil
 
 
 def experiment(data, folder):
     lambda1 = float(data['lambda1'])
-    lambda2 = float(data['lambda1'])
+    lambda2 = float(data['lambda2'])
     lambdad = float(data['lambdadelta'])
     freecad_file = os.path.join(folder, data['freecad_file'])
     PV_file = os.path.join(folder, data['PV_file'])
 
     logging.debug("in exp1", locals())
-    destfile = folder + '.output'
-    with io.open(destfile, 'w', encoding='utf8') as fp:
-        string = u"parameters: {}, {}, {}, {}".format(lambda1, lambda2, lambdad, lambda2 - lambda1)
-        fp.write(string)
 
     FreeCAD.openDocument(freecad_file)
     doc = FreeCAD.ActiveDocument
@@ -44,17 +41,19 @@ def experiment(data, folder):
     theta_step = 2
     number_of_rays = 10
     aperture_collector = 1. * 1. * 1.0
-    lambda_ini = 295.0
-    lambda_end = 810.5
-    step_lambda = 0.5
+    lambda_ini = lambda1 # 295.0
+    lambda_end = lambda2 # 810.5
+    step_lambda = lambdad # 0.5
     ##### data_file_spectrum = 'ASTMG173-direct.txt'
     # light_spectrum = raytrace.create_CDF_from_PDF(data_file_spectrum)
     # Buie_model = raytrace.BuieDistribution(0.05)
     Buie_model = None
-    outfile = open(os.path.join(folder,'kkk4.txt'), 'w')
-    outfile_PV = open(os.path.join(folder,'PV-10000-CAS4-kk.txt'), 'w')
-    outfile_PV_values = open(os.path.join(folder,'PV_values_1micro.txt'), 'w')
-    outfile_Source_lambdas = open(os.path.join(folder,'Source_lambdas_1micro.txt'), 'w')
+    destfolder = folder + '.output'
+    os.makedirs(destfolder)
+    outfile = open(os.path.join(destfolder,'kkk4.txt'), 'w')
+    outfile_PV = open(os.path.join(destfolder,'PV-10000-CAS4-kk.txt'), 'w')
+    outfile_PV_values = open(os.path.join(destfolder,'PV_values_1micro.txt'), 'w')
+    outfile_Source_lambdas = open(os.path.join(destfolder,'Source_lambdas_1micro.txt'), 'w')
     outfile_Source_lambdas.write("%s %s" % (aperture_collector * 0.001 * 0.001, "# Collector aperture in m2") + '\n')
     outfile_Source_lambdas.write("%s %s" % (number_of_rays, "# Rays per wavelength") + '\n')
     outfile_Source_lambdas.write("%s %s" % (step_lambda, "# Step of wavelength in nm") + '\n')
@@ -79,7 +78,7 @@ def experiment(data, folder):
             efficiency = (exp.captured_energy / aperture_collector) / (
                     exp.number_of_rays / exp.light_source.emitting_region.aperture)
             t1 = time.time()
-            print ("%s %s %s %s" % (w, th, efficiency, t1 - t0) + '\n')
+            # print ("%s %s %s %s" % (w, th, efficiency, t1 - t0) + '\n')
             outfile.write("%s %s %s %s" % (ph, th, efficiency, t1 - t0) + '\n')
             PV_energy.append(exp.PV_energy)
             PV_wavelength.append(exp.PV_wavelength)
@@ -100,4 +99,4 @@ def experiment(data, folder):
     outfile_PV.close()
     outfile_PV_values.close()
     outfile_Source_lambdas.close()
-    return outfile
+    shutil.make_archive(folder, 'zip', destfolder)

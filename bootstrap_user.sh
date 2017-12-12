@@ -10,4 +10,6 @@ virtualenv venv
 source venv/bin/activate
 which python
 pip install flask
+pip install pysunscene
+pip install enum
 deactivate

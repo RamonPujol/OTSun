@@ -1,9 +1,11 @@
-import io, os
+import io, os, shutil
 import logging
 
 
 def experiment(data, folder):
-    destfile = folder + '.output'
+    destfolder = folder + '.output'
+    os.makedirs(destfolder)
+    destfile = os.path.join(destfolder,'data.log')
     with io.open(destfile, 'w', encoding='utf8') as fp:
         fp.write(u"Experiment not found\n")
         fp.write(u"Data given:\n----\n")
@@ -12,4 +14,4 @@ def experiment(data, folder):
         fp.write(u"\nUploaded files:\n----\n")
         for uploaded_filename in os.listdir(folder):
             fp.write(u"%s\n" % (uploaded_filename,))
-    return destfile
+    shutil.make_archive(folder, 'zip', destfolder)

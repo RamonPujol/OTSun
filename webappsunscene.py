@@ -92,7 +92,6 @@ def send_mail(toaddr, identifier):
 
 def process_request(identifier):
     # Call the processing unit
-    sleep(1)
     dirname = files_folder(identifier)
     datafile = json_file(identifier)
     process_input(datafile, dirname)
@@ -162,7 +161,7 @@ def send_file(identifier=None):
         logging.info("Requesting results")
     if identifier is None:
         return "No process job specified"
-    return send_from_directory(UPLOAD_FOLDER, identifier + '.output')
+    return send_from_directory(UPLOAD_FOLDER, identifier + '.zip')
 
 
 if __name__ == '__main__':
