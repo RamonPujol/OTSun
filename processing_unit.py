@@ -6,6 +6,7 @@ import logging
 logging.getLogger().setLevel(logging.DEBUG)
 
 from experiment1 import experiment as experiment1
+from experiment1par import experiment as experiment1par
 from dummy_experiment import experiment as dummy_experiment
 
 def process_input(datafile, folder):
