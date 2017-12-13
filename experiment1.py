@@ -68,7 +68,7 @@ def experiment(data, folder):
                 emitting_region = raytrace.SunWindow(current_scene, main_direction)
                 l_s = raytrace.LightSource(current_scene, emitting_region, light_spectrum, 1.0, Buie_model)
                 exp = raytrace.Experiment(current_scene, l_s, number_of_rays)
-    
+
                 exp.run()
                 efficiency = (exp.captured_energy / aperture_collector) / (
                         exp.number_of_rays / exp.light_source.emitting_region.aperture)

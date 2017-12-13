@@ -1,18 +1,6 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <title>End</title>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+{% extends "base.html" %}
 
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
-  </head>
-<body>
-  <div class="container">
-    <h1>Thank you for using our web-app! </h1>
+{% block content %}
+    <h2>Thank you for using our web-app! </h2>
       We will send you a link to your results when they are ready.
-  </div>
-</body>
-</html>
+{% endblock %}

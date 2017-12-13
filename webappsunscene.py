@@ -43,13 +43,17 @@ def json_file(identifier):
     return files_folder(identifier)+'.json'
 
 
-def load_data(identifier):
+def load_json(filename):
     try:
-        with open(json_file(identifier), 'r') as fp:
+        with open(filename, 'r') as fp:
             saved_data = json.load(fp)
     except IOError:
         saved_data = {}
     return saved_data
+
+
+def load_data(identifier):
+    return load_json(json_file(identifier))
 
 
 def save_data(data, identifier):
@@ -151,6 +155,19 @@ def end_process(identifier):
     compute_thread.start()
     return render_template("end.html")
 
+
+@app.route('/status/<identifier>')
+def status(identifier):
+    if identifier:
+        logging.info("Processing status/%s", identifier)
+    else:
+        logging.info("Processing status ")
+    statusfile = files_folder(identifier) + '.status'
+    data_status = load_json(statusfile)
+    if not data_status:
+        return render_template("error.html", identifier=identifier)
+    percentage = data_status['percentage']
+    return render_template("status.html", percentage=percentage)
 
 @app.route('/results/<identifier>', methods=['GET'])
 @app.route('/results/')
