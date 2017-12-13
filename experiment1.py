@@ -10,6 +10,8 @@ import numpy as np
 import time
 import shutil
 
+logging.getLogger().setLevel(logging.DEBUG)
+
 
 def experiment(data, folder):
     phi1 = float(data['phi1']) + 0.000001 #0 + 0.0000001 # TODO: pq sumar?
@@ -62,6 +64,7 @@ def experiment(data, folder):
     for ph in np.arange(phi1, phi2, phidelta):
         for th in np.arange(theta1, theta2, thetadelta):
             for w in np.arange(lambda1, lambda2, lambdadelta):
+                logging.debug("experiment1: %s, %s, %s",ph,th,w)
                 light_spectrum = w
                 Source_lambdas.append(w)
                 main_direction = raytrace.polar_to_cartesian(ph, th) * -1.0  # Sun direction vector
@@ -81,11 +84,11 @@ def experiment(data, folder):
 
     xarray = np.array(np.concatenate(PV_energy))
     yarray = np.array(np.concatenate(PV_wavelength))
-    data = np.array([xarray, yarray])
-    data = data.T
+    datacomp = np.array([xarray, yarray])
+    datacomp = datacomp.T
     data_PV_values = np.array(np.concatenate(PV_values))
     data_Source_lambdas = np.array(Source_lambdas)
-    np.savetxt(outfile_PV, data, fmt=['%f', '%f'])
+    np.savetxt(outfile_PV, datacomp, fmt=['%f', '%f'])
     np.savetxt(outfile_PV_values, data_PV_values, fmt=['%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f'])
 
     np.savetxt(outfile_Source_lambdas, data_Source_lambdas, fmt=['%f'])

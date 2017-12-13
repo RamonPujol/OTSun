@@ -1,3 +1,13 @@
+"""
+This is an example of how to program an experiment to be run by the web app.
+Guidelines:
+* The name of the file must be the identifier given in the companion template
+* It must implement a method experiment(data, folder).
+** data is a dictionary with the data given by the user
+** folder is the name of the folder where to find the files uploaded files by the user
+* The files sent back to the user (in a zip file) will be those found in the folder folder+'.output'
+* In the file folder+'status' you must write a json file with the percentage of computation that is completed
+"""
 import io, os, shutil
 import json
 from time import sleep

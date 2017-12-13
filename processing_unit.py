@@ -26,4 +26,4 @@ def process_input(datafile, folder):
         logging.info("calling:" + experiment_id)
         callable(data, folder)
     else:
-        dummy_experiment(data,folder)
+        raise ValueError('The experiment is not implemented', experiment_id)
