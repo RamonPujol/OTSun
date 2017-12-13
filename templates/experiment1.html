@@ -15,6 +15,7 @@
             <input type="file" class="form-control-file" id="PV_file" name="PV_file">
         </div>
 
+        {#
         <div class="form-group">
             <label for="lambda1">Initial lambda</label>
             <input type="text" class="form-control" id="lambda1" placeholder="Parameter" name="lambda1">
@@ -29,6 +30,55 @@
             <label for="lambdadelta">Step lambda</label>
             <input type="text" class="form-control" id="lambdadelta" placeholder="Parameter" name="lambdadelta">
         </div>
+        #}
+
+        <div class="form-group">
+            <label for="phis">phi</label>
+            <div class="form-row" id="phis">
+                <div class="col">
+                    <input type="text" class="form-control" placeholder="Initial" id="phi1" name="phi1">
+                </div>
+                <div class="col">
+                    <input type="text" class="form-control" placeholder="Final" id="phi2" name="phi2">
+                </div>
+                <div class="col">
+                    <input type="text" class="form-control" placeholder="Step" id="phidelta" name="phidelta">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="thetas">theta</label>
+            <div class="form-row" id="thetas">
+                <div class="col">
+                    <input type="text" class="form-control" placeholder="Initial" id="theta1" name="theta1">
+                </div>
+                <div class="col">
+                    <input type="text" class="form-control" placeholder="Final" id="theta2" name="theta2">
+                </div>
+                <div class="col">
+                    <input type="text" class="form-control" placeholder="Step" id="thetadelta" name="thetadelta">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="lambdas">lambda</label>
+            <div class="form-row" id="lambdas">
+                <div class="col">
+                    <input type="text" class="form-control" placeholder="Initial" id="lambda1" name="lambda1">
+                </div>
+                <div class="col">
+                    <input type="text" class="form-control" placeholder="Final" id="lambda2" name="lambda2">
+                </div>
+                <div class="col">
+                    <input type="text" class="form-control" placeholder="Step" id="lambdadelta" name="lambdadelta">
+                </div>
+            </div>
+        </div>
+
+
+
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>
 {% endblock %}
