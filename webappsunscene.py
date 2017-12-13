@@ -7,7 +7,6 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import threading
-from time import sleep
 from werkzeug.utils import secure_filename
 from processing_unit import process_input
 import logging
@@ -153,7 +152,7 @@ def end_process(identifier):
         URL_ROOT = request.url_root
     compute_thread = threading.Thread(target=process_request, args=(identifier,))
     compute_thread.start()
-    return render_template("end.html")
+    return render_template("end.html", identifier=identifier)
 
 
 @app.route('/status/<identifier>')
@@ -166,8 +165,8 @@ def status(identifier):
     data_status = load_json(statusfile)
     if not data_status:
         return render_template("error.html", identifier=identifier)
-    percentage = data_status['percentage']
-    return render_template("status.html", percentage=percentage)
+    return render_template("status.html", identifier=identifier, data_status=data_status)
+
 
 @app.route('/results/<identifier>', methods=['GET'])
 @app.route('/results/')

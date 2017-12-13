@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+
+{% block content %}
+    The current state of your computation with identifier
+    {{ identifier }} is:
+    <br>
+    Percentage of computation: {{ data_status['percentage'] }}&#37;
+{% endblock %}
