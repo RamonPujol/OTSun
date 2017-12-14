@@ -20,7 +20,7 @@ def experiment(data, root_folder):
     os.makedirs(dest_folder)
     dest_file = os.path.join(dest_folder,'data.log')
     with io.open(dest_file, 'w', encoding='utf8') as fp:
-        fp.write(u"Experiment not found\n")
+        fp.write(u"This is the Dummy experiment\n")
         fp.write(u"Data given:\n----\n")
         for key in data:
             fp.write(u"%s: %s\n" % (key, data[key]))

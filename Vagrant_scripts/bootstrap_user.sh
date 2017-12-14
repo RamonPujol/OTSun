@@ -7,7 +7,7 @@ cp -r /vagrant/*py ./
 cp -r /vagrant/*wsgi ./
 cp -r /vagrant/templates ./
 virtualenv venv
-source venv/bin/activate
+source ../venv/bin/activate
 which python
 pip install flask
 pip install pysunscene
