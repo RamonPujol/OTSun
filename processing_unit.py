@@ -9,7 +9,7 @@ from experiment1 import experiment as experiment1
 from experiment1par import experiment as experiment1par
 from dummy_experiment import experiment as dummy_experiment
 
-def process_input(datafile, folder):
+def process_input(datafile, root_folder):
     # Take data from datafile and files from folder
     try:
         with open(datafile, 'r') as fp:
@@ -25,6 +25,6 @@ def process_input(datafile, folder):
         logging.info(str(locals()))
         callable = globals()[experiment_id]
         logging.info("calling:" + experiment_id)
-        callable(data, folder)
+        callable(data, root_folder)
     else:
         raise ValueError('The experiment is not implemented', experiment_id)

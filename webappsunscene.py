@@ -31,15 +31,26 @@ URL_ROOT = None
 # logging.addHandler(handler)
 
 
-def files_folder(identifier):
+def root_folder(identifier):
     folder = os.path.join(UPLOAD_FOLDER, identifier)
     if not os.path.exists(folder):
         os.makedirs(folder)
     return folder
 
 
+def files_folder(identifier):
+    folder = os.path.join(root_folder(identifier), 'files')
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    return folder
+
+
 def json_file(identifier):
-    return files_folder(identifier)+'.json'
+    return os.path.join(root_folder(identifier), 'data.json')
+
+
+def status_file(identifier):
+    return os.path.join(root_folder(identifier), 'status.json')
 
 
 def load_json(filename):
@@ -95,7 +106,7 @@ def send_mail(toaddr, identifier):
 
 def process_request(identifier):
     # Call the processing unit
-    dirname = files_folder(identifier)
+    dirname = root_folder(identifier)
     datafile = json_file(identifier)
     process_input(datafile, dirname)
     # Send mail with link
@@ -161,8 +172,7 @@ def status(identifier):
         logging.info("Processing status/%s", identifier)
     else:
         logging.info("Processing status ")
-    statusfile = files_folder(identifier) + '.status'
-    data_status = load_json(statusfile)
+    data_status = load_json(status_file(identifier))
     if not data_status:
         return render_template("error.html", identifier=identifier)
     return render_template("status.html", identifier=identifier, data_status=data_status)
@@ -177,7 +187,7 @@ def send_file(identifier=None):
         logging.info("Requesting results")
     if identifier is None:
         return "No process job specified"
-    return send_from_directory(UPLOAD_FOLDER, identifier + '.zip')
+    return send_from_directory(root_folder(identifier), 'output.zip')
 
 
 if __name__ == '__main__':

@@ -10,6 +10,7 @@ import numpy as np
 import time
 import shutil
 import multiprocessing
+import json
 
 logging.getLogger().setLevel(logging.DEBUG)
 
@@ -52,13 +53,21 @@ def compute(args):
     global finished_computations_counter
     with finished_computations_counter.get_lock():
         finished_computations_counter.value += 1
+        value = finished_computations_counter.value
+        if (value % ( total_computations / 100 )) == 0:
+            percentage = 100*float(value)/total_computations
+            logging.debug('experiment is at %s percent', percentage)
+            data_status={'percentage':percentage}
+            with open(status_file, 'w') as fp:
+                json.dump(data_status, fp)
+
     logging.debug('finished %s of %s computations', finished_computations_counter.value, total_computations)
 
     # return the results
     return (ph, th, w, efficiency, exp.PV_energy, exp.PV_wavelength, exp.PV_values)
 
 
-def experiment(data, folder):
+def experiment(data, root_folder):
     global current_scene
 
     # get parameters of the experiment from the data dict
@@ -73,8 +82,9 @@ def experiment(data, folder):
     lambda1 = float(data['lambda1']) # # 295.0
     lambda2 = float(data['lambda2']) # # 810.5
     lambdadelta = float(data['lambdadelta']) # # 0.5
-    freecad_file = os.path.join(folder, data['freecad_file'])
-    PV_file = os.path.join(folder, data['PV_file'])
+    files_folder = os.path.join(root_folder,'files')
+    freecad_file = os.path.join(files_folder, data['freecad_file'])
+    PV_file = os.path.join(files_folder, data['PV_file'])
 
     logging.debug("in exp1", locals())
 
@@ -104,15 +114,17 @@ def experiment(data, folder):
                 #pool.apply_async(compute,(ph, th, w, number_of_rays, aperture_collector))#, callback=process_computation)
                 #logging.debug("pooling %s, %s, %s",ph,th,w)
                 list_pars.append((ph, th, w, number_of_rays, aperture_collector))
+
+    # Prepare shared counter of finished computations and status file
+    finished_computations_counter = multiprocessing.Value('i',0)
     global total_computations
     total_computations = len(list_pars)
-    ###list_pars = [par+(total_computations,) for par in list_pars]
+    global status_file
+    status_file = os.path.join(root_folder, 'status.json')
 
-    # Prepare shared counter of finished computations
-    finished_computations_counter = multiprocessing.Value('i',0)
 
     # Prepare pool of workers and feed it
-    logging.debug("number of cpus: %s", multiprocessing.cpu_count())
+    logging.info("number of cpus: %s", multiprocessing.cpu_count())
     pool = multiprocessing.Pool(initializer = init_counter, initargs = (finished_computations_counter, ))
     results = pool.map(compute, list_pars)
     logging.debug('finisehd pool.map %s, %s', len(results), len(list_pars))
@@ -142,7 +154,7 @@ def experiment(data, folder):
     data_Source_lambdas = np.array(Source_lambdas)
 
     # Write files with output
-    destfolder = folder + '.output'
+    destfolder = os.path.join(root_folder, 'output')
     os.makedirs(destfolder)
     with open(os.path.join(destfolder,'kkk4.txt'), 'w') as outfile:
         for result in results:
@@ -158,4 +170,4 @@ def experiment(data, folder):
         np.savetxt(outfile_Source_lambdas, data_Source_lambdas, fmt=['%f'])
 
     # Prepare zipfile
-    shutil.make_archive(folder, 'zip', destfolder)
+    shutil.make_archive(destfolder, 'zip', destfolder)
