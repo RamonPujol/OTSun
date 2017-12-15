@@ -10,7 +10,8 @@ import numpy as np
 import time
 import shutil
 
-logging.getLogger().setLevel(logging.DEBUG)
+#logging.getLogger().setLevel(logging.DEBUG)
+logger=logging.getLogger(__name__)
 
 
 def experiment(data, folder):
@@ -28,7 +29,7 @@ def experiment(data, folder):
     freecad_file = os.path.join(folder, data['freecad_file'])
     PV_file = os.path.join(folder, data['PV_file'])
 
-    logging.debug("in exp1", locals())
+    logger.debug("in exp1", locals())
 
     FreeCAD.openDocument(freecad_file)
     doc = FreeCAD.ActiveDocument
@@ -64,7 +65,7 @@ def experiment(data, folder):
     for ph in np.arange(phi1, phi2, phidelta):
         for th in np.arange(theta1, theta2, thetadelta):
             for w in np.arange(lambda1, lambda2, lambdadelta):
-                logging.debug("experiment1: %s, %s, %s",ph,th,w)
+                logger.debug("experiment1: %s, %s, %s",ph,th,w)
                 light_spectrum = w
                 Source_lambdas.append(w)
                 main_direction = raytrace.polar_to_cartesian(ph, th) * -1.0  # Sun direction vector

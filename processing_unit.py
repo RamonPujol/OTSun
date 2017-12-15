@@ -5,10 +5,10 @@ import logging
 import pkgutil
 import experiments
 
-logging.getLogger().setLevel(logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 for importer, modname, ispkg in pkgutil.iter_modules(experiments.__path__):
-    logging.info("Found submodule %s (is a package: %s)" % (modname, ispkg))
+    logger.info("Found submodule %s (is a package: %s)" % (modname, ispkg))
     string = "from experiments.%s import experiment as %s" % (modname, modname)
     exec string
 
@@ -29,10 +29,10 @@ def process_input(datafile, root_folder):
     experiment_id = data.get('experiment', None)
     callable_experiment = globals().get(experiment_id, None)
     if callable_experiment:
-        logging.info('experiment is ' + experiment_id)
-        logging.info(str(locals()))
+        logger.info('experiment is ' + experiment_id)
+        logger.info(str(locals()))
         callable_experiment = globals()[experiment_id]
-        logging.info("calling:" + experiment_id)
+        logger.info("calling:" + experiment_id)
         callable_experiment(data, root_folder)
     else:
         raise ValueError('The experiment is not implemented', experiment_id)

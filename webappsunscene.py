@@ -10,6 +10,7 @@ import threading
 from werkzeug.utils import secure_filename
 from processing_unit import process_input
 import logging
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
@@ -116,7 +117,7 @@ def process_request(identifier):
 
 @app.route('/')
 def hello():
-    logging.info("Processing root")
+    logger.info("Processing root")
     global URL_ROOT
     if URL_ROOT is None:
         URL_ROOT = request.url_root
@@ -127,9 +128,9 @@ def hello():
 @app.route('/node/<name>', methods=['GET', 'POST'])
 def node(name, identifier=None):
     if identifier:
-        logging.info("Processing %s/%s", name, identifier)
+        logger.info("Processing %s/%s", name, identifier)
     else:
-        logging.info("Processing %s ", name)
+        logger.info("Processing %s ", name)
     if request.method == 'GET':
         return render_template(name + ".html", identifier=identifier)
     if request.method == 'POST':
@@ -142,7 +143,7 @@ def node(name, identifier=None):
             if the_file and the_file.filename != "":
                 filename = the_file.filename
                 filename = secure_filename(filename)
-                logging.debug("filename is %s", filename)
+                logger.debug("filename is %s", filename)
                 save_file(the_file, identifier, filename)
                 data[file_id] = filename
         save_data(data, identifier)
@@ -155,9 +156,9 @@ def node(name, identifier=None):
 @app.route('/end/<identifier>')
 def end_process(identifier):
     if identifier:
-        logging.info("Processing end/%s", identifier)
+        logger.info("Processing end/%s", identifier)
     else:
-        logging.info("Processing end ")
+        logger.info("Processing end ")
     global URL_ROOT
     if URL_ROOT is None:
         URL_ROOT = request.url_root
@@ -169,9 +170,9 @@ def end_process(identifier):
 @app.route('/status/<identifier>')
 def status(identifier):
     if identifier:
-        logging.info("Processing status/%s", identifier)
+        logger.info("Processing status/%s", identifier)
     else:
-        logging.info("Processing status ")
+        logger.info("Processing status ")
     data_status = load_json(status_file(identifier))
     if not data_status:
         return render_template("error.html", identifier=identifier)
@@ -182,9 +183,9 @@ def status(identifier):
 @app.route('/results/')
 def send_file(identifier=None):
     if identifier:
-        logging.info("Requesting results of %s", identifier)
+        logger.info("Requesting results of %s", identifier)
     else:
-        logging.info("Requesting results")
+        logger.info("Requesting results")
     if identifier is None:
         return "No process job specified"
     return send_from_directory(root_folder(identifier), 'output.zip')

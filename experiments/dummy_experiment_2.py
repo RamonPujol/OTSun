@@ -28,6 +28,11 @@ def experiment(data, root_folder):
         fp.write(u"\nUploaded files:\n----\n")
         for uploaded_filename in os.listdir(root_folder):
             fp.write(u"%s\n" % (uploaded_filename,))
+
+    other_file = os.path.join(dest_folder, 'otherfile')
+    with io.open(other_file, 'w', encoding='utf8') as fp:
+        fp.write(u"Hola!")
+
     shutil.make_archive(dest_folder, 'zip', dest_folder)
 
     status_file = os.path.join(root_folder, 'status.json')

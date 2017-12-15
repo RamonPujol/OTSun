@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+    I will just log your input... this is a new test
+        <form method=post enctype=multipart/form-data>
+        <input type="hidden" name="next_step" value="confirm">
+        <input type="hidden" name="experiment" value="dummy_experiment_2">
+
+        <div class="form-group">
+            <label for="lambda1">Initial lambda</label>
+            <input type="text" class="form-control" id="lambda1" placeholder="Parameter" name="lambda1">
+        </div>
+
+        <div class="form-group">
+            <label for="lambda2">Final lambda</label>
+            <input type="text" class="form-control" id="lambda2" placeholder="Parameter" name="lambda2">
+        </div>
+
+        <div class="form-group">
+            <label for="lambda3">Step lambda</label>
+            <input type="text" class="form-control" id="lambda3" placeholder="Parameter" name="lambdadelta">
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+
+
+        <div class="form-group">
+            <label for="theta1">Initial theta</label>
+            <input type="text" class="form-control" id="theta1" placeholder="Parameter" name="theta1">
+        </div>
+
+        <div class="form-group">
+            <label for="theta2">Final theta</label>
+            <input type="text" class="form-control" id="theta2" placeholder="Parameter" name="theta2">
+        </div>
+
+        <div class="form-group">
+            <label for="theta3">Step theta</label>
+            <input type="text" class="form-control" id="theta3" placeholder="Parameter" name="thetadelta">
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+{% endblock %}
