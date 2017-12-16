@@ -98,4 +98,4 @@ def experiment(data, folder):
     outfile_PV.close()
     outfile_PV_values.close()
     outfile_Source_lambdas.close()
-    shutil.make_archive(folder, 'zip', destfolder)
+#    shutil.make_archive(folder, 'zip', destfolder)

@@ -28,7 +28,7 @@ def experiment(data, root_folder):
         fp.write(u"\nUploaded files:\n----\n")
         for uploaded_filename in os.listdir(root_folder):
             fp.write(u"%s\n" % (uploaded_filename,))
-    shutil.make_archive(dest_folder, 'zip', dest_folder)
+#    shutil.make_archive(dest_folder, 'zip', dest_folder)
 
     status_file = os.path.join(root_folder, 'status.json')
     data_status = {'percentage':0}

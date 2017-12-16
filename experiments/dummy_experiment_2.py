@@ -6,7 +6,7 @@ Guidelines:
 ** data is a dictionary with the data given by the user
 ** rootfolder is the name of the root folder of the experiment
 * The files uploaded by the user are in rootfolder/files
-* The (zip) file sent back to the user will be rootfolder/output.zip
+* The output files must be put in rootfolder/output
 * In the file rootfolder/status.json you must write a json file with the percentage of computation that is completed
 """
 import io, os, shutil
@@ -33,7 +33,7 @@ def experiment(data, root_folder):
     with io.open(other_file, 'w', encoding='utf8') as fp:
         fp.write(u"Hola!")
 
-    shutil.make_archive(dest_folder, 'zip', dest_folder)
+#    shutil.make_archive(dest_folder, 'zip', dest_folder)
 
     status_file = os.path.join(root_folder, 'status.json')
     data_status = {'percentage':0}

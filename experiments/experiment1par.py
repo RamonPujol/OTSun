@@ -22,6 +22,15 @@ def init_counter(args):
     global finished_computations_counter
     finished_computations_counter = args
 
+def update_percentage(partial, total):
+    percentage = (100 * partial) / total
+    logger.debug('experiment is at %s percent', percentage)
+    data_status = {'percentage': percentage}
+    if partial == total:
+        data_status['finished'] = True
+    with open(status_file, 'w') as fp:
+        json.dump(data_status, fp)
+
 
 def computeX(args):
     ph, th, w, number_of_rays, aperture_collector = args
@@ -54,14 +63,9 @@ def compute(args):
     with finished_computations_counter.get_lock():
         finished_computations_counter.value += 1
         value = finished_computations_counter.value
-        if (value % (total_computations / 100)) == 0:
-            percentage = 100 * float(value) / total_computations
-            logger.debug('experiment is at %s percent', percentage)
-            data_status = {'percentage': percentage}
-            with open(status_file, 'w') as fp:
-                json.dump(data_status, fp)
-
-    logger.debug('finished %s of %s computations', finished_computations_counter.value, total_computations)
+        if (value == total_computations) or ((value % (total_computations / 100)) == 0):
+            update_percentage(value, total_computations)
+        logger.debug('finished %s of %s computations', value, total_computations)
 
     # return the results
     return (ph, th, w, efficiency, exp.PV_energy, exp.PV_wavelength, exp.PV_values)
@@ -168,4 +172,4 @@ def experiment(data, root_folder):
         np.savetxt(outfile_Source_lambdas, data_source_lambdas, fmt=['%f'])
 
     # Prepare zipfile
-    shutil.make_archive(destfolder, 'zip', destfolder)
+#    shutil.make_archive(destfolder, 'zip', destfolder)
