@@ -27,7 +27,9 @@ def update_percentage(partial, total):
     logger.debug('experiment is at %s percent', percentage)
     data_status = {'percentage': percentage}
     if partial == total:
-        data_status['finished'] = True
+        data_status['status'] = 'finished'
+    else:
+        data_status['status'] = 'running'
     with open(status_file, 'w') as fp:
         json.dump(data_status, fp)
 
