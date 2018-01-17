@@ -51,4 +51,3 @@ def process_input(datafile, root_folder):
     output_folder = os.path.join(root_folder, 'output')
     output_zip = os.path.join(root_folder, 'output.zip')
     make_zipfile(output_zip, output_folder)
-

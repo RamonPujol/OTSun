@@ -36,13 +36,18 @@ def experiment(data, root_folder):
 #    shutil.make_archive(dest_folder, 'zip', dest_folder)
 
     status_file = os.path.join(root_folder, 'status.json')
-    data_status = {'percentage':0}
+    data_status = {'percentage':0, 'status':'started'}
 
     for _ in range(100):
+        data_status['status'] = 'running'
         data_status['percentage'] += 1
         with open(status_file, 'w') as fp:
             json.dump(data_status, fp)
         logger.debug("completed: %s", data_status['percentage'])
         sleep(0.1)
+    data_status['status'] = 'finished'
+    data_status['percentage'] = 100
+    with open(status_file, 'w') as fp:
+        json.dump(data_status, fp)
 
 
