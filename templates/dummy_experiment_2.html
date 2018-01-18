@@ -2,7 +2,8 @@
 
 {% block content %}
     I will just log your input... this is a new test
-        <form method=post enctype=multipart/form-data>
+<div class="jumbotron">
+    <form method=post enctype=multipart/form-data>
         <input type="hidden" name="next_step" value="confirm">
         <input type="hidden" name="experiment" value="dummy_experiment_2">
 
@@ -22,7 +23,11 @@
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>
-
+</div>
+<div class="jumbotron">
+    <form method=post enctype=multipart/form-data>
+        <input type="hidden" name="next_step" value="confirm">
+        <input type="hidden" name="experiment" value="dummy_experiment_2">
 
         <div class="form-group">
             <label for="theta1">Initial theta</label>
@@ -40,4 +45,4 @@
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>
-{% endblock %}
+</div>{% endblock %}
