@@ -11,3 +11,4 @@ venv_vanilla
 .idea_uib
 venv_vagrant (1)
 Vagrantfile
+venv_new

@@ -6,6 +6,7 @@ sys.path.append("/usr/lib/freecad")
 sys.path.append("/usr/lib/freecad/lib")
 import FreeCAD
 import raytrace
+import raytrace
 import numpy as np
 import time
 import shutil

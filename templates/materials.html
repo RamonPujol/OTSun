@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Material creator</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+  </head>
+  <body>
+  <div class="container">
+    <h1>Creator of Materials</h1>
+      <form method=post enctype=multipart/form-data>
+          <div id="menus">
+          </div>
+      </form>
+ </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+
+<script type="application/javascript">
+
+    var choice_submit = `
+    <div class="menu"><button type="submit" class="btn btn-primary">Submit</button></div>
+    `;
+
+    var choice1 = `
+          <div class="menu">
+          <div class="form-group">
+            <label for="name">Identifier of material to create</label>
+            <input type="text" class="form-control" id="name" placeholder="Name" name="name">
+          </div>
+          <div class="form-group">
+              <label for="choice1">Kind of material</label><br>
+              <select id="choice1" name="choice1" class="form-control">
+                  <option selected disabled>Choose one</option>
+                  <option value="choice_solid">Solid</option>
+                  <option value="choice_surface">Surface</option>
+              </select>
+          </div>
+          </div>
+    `;
+    var choice_solid = `
+          <div class="menu">
+          <div class="form-group">
+               <label for="choice_solid">Kind of solid</label><br>
+              <select id="choice_solid" name="choice_solid" class="form-control">
+                  <option selected disabled>Choose one</option>
+                  <option value="choice_simple_solid">Simple solid</option>
+                  <option value="choice_pv_material">PV material</option>
+              </select>
+          </div>
+          </div>
+    `;
+    var choice_simple_solid = `
+          <div class="menu">
+          <div class="form-group">
+            <label for="ior">Index of refraction</label>
+            <input type="text" class="form-control" id="ior" placeholder="Parameter" name="ior">
+        </div></div>
+     `+choice_submit;
+    var choice_pv_material = `
+    <div class="menu">Aqui PV material</div>
+     `;
+    var choice_surface = `
+    <div class="menu">Aqui Surface</div>
+     `;
+
+    $(document).ready(function(){
+        $("#menus").html(choice1);
+        $("#menus").on("change","select", function(){
+            var selectedValue = $(this).val();
+            // console.log($(this));
+            $(this).closest(".menu").nextAll().remove();
+            $("#menus").append(window[selectedValue]);
+        });
+    });
+
+
+</script>
+  </body>
+</html>

@@ -8,7 +8,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import threading
 from werkzeug.utils import secure_filename
-from processing_unit import process_input
+from processing_unit import process_experiment, run_processor
 import logging
 logger = logging.getLogger(__name__)
 
@@ -16,6 +16,7 @@ app = Flask(__name__)
 
 UPLOAD_FOLDER = '/tmp/WebAppSunScene'
 if not os.path.exists(UPLOAD_FOLDER):
+    logger.info('creating upload folder')
     os.makedirs(UPLOAD_FOLDER)
 else:
     if not os.access(UPLOAD_FOLDER, os.W_OK):
@@ -109,10 +110,18 @@ def process_request(identifier):
     # Call the processing unit
     dirname = root_folder(identifier)
     datafile = json_file(identifier)
-    process_input(datafile, dirname)
+    process_experiment(datafile, dirname)
     # Send mail with link
     data = load_data(identifier)
     send_mail(toaddr=data['email'], identifier=identifier)
+
+
+def process_processor(identifier):
+    # Call the processing unit
+    dirname = root_folder(identifier)
+    datafile = json_file(identifier)
+    return run_processor(datafile, dirname)
+
 
 
 @app.route('/')
@@ -132,7 +141,11 @@ def node(name, identifier=None):
     else:
         logger.info("Processing %s ", name)
     if request.method == 'GET':
-        return render_template(name + ".html", identifier=identifier)
+        if identifier:
+            data = load_data(identifier)
+        else:
+            data = {}
+        return render_template(name + ".html", identifier=identifier, data=data)
     if request.method == 'POST':
         data = request.form.to_dict()
         if identifier is None:
@@ -147,6 +160,10 @@ def node(name, identifier=None):
                 save_file(the_file, identifier, filename)
                 data[file_id] = filename
         save_data(data, identifier)
+        if 'processor' in data:
+            # TODO: process input
+            new_data = process_processor(identifier)
+            save_data(new_data, identifier)
         if 'next_step' in data:
             return redirect('node/' + data['next_step'] + '/' + identifier)
         else:
@@ -189,6 +206,15 @@ def send_file(identifier=None):
     if identifier is None:
         return "No process job specified"
     return send_from_directory(root_folder(identifier), 'output.zip')
+
+
+@app.route('/material', methods=['GET','POST'])
+def material():
+    if request.method == 'GET':
+        return render_template('materials.html')
+    if request.method == 'POST':
+        data = request.form.to_dict()
+        return "Will process data: %s" % data
 
 
 if __name__ == '__main__':
