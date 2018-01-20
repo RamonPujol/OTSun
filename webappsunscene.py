@@ -1,5 +1,6 @@
 from __future__ import print_function
 from flask import Flask, request, redirect, render_template, send_from_directory
+import flask
 from uuid import uuid4
 import os
 import json
@@ -9,6 +10,7 @@ from email.mime.text import MIMEText
 import threading
 from werkzeug.utils import secure_filename
 from processing_unit import process_experiment, run_processor
+from materials import create_material
 import logging
 logger = logging.getLogger(__name__)
 
@@ -214,7 +216,10 @@ def material():
         return render_template('materials.html')
     if request.method == 'POST':
         data = request.form.to_dict()
-        return "Will process data: %s" % data
+        logger.info("creating material with data:", data)
+        files = request.files
+        filename = create_material(data, files)
+        return flask.send_file(filename,as_attachment=True)
 
 
 if __name__ == '__main__':

@@ -2,53 +2,15 @@
 
 {% block content %}
 
-    <form method=post enctype=multipart/form-data>
-        <input type="hidden" name="next_step" value="confirm">
-        <input type="hidden" name="experiment" value="dummy_experiment">
+
+    <p>You must upload a zip file with the .rtmaterial files of the following materials:
+    </p>
 
     Solids:
 <ul>
     {% for solid in data.solid_material_labels %}
     <li>
         {{ solid }}
-
-
-    <div id="viewport" class="container">
-    <h5>Define solid</h5>
-    <div class="row">
-        <div>
-            <ul class="nav nav-tabs" role="tablist">
-                <li class="nav-item">
-                    <a class="nav-link" data-toggle="tab" href="#simple-{{ solid }}" role="tab">Simple</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" data-toggle="tab" href="#pv-{{ solid }}" role="tab">PV</a>
-                </li>
-            </ul>
-        </div>
-    </div>
-
- <div class="tab-content">
-    <div id="simple-{{ solid }}" class="tab-pane fade in active">
-      Simple material
-        <input type="hidden" name="kind-{{ solid }}" value="simple">
-        <div class="form-group">
-            <label for="ior-{{ solid }}">Index of refraction</label>
-            <input type="text" class="form-control" id="ior-{{ solid }}" placeholder="Parameter" name="ior-{{ solid }}">
-        </div>
-
-    </div>
-    <div id="pv-{{ solid }}" class="tab-pane fade">
-      <h3>Menu 1</h3>
-      <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-    </div>
-  </div>
-
-
-
-
-
-
     </li>
     {% endfor %}
 </ul>
@@ -58,54 +20,23 @@
     {% for face in data.faces_material_labels %}
     <li>
         {{ face }}
-
-
-    <div id="viewport" class="container">
-    <h5>Define face</h5>
-    <div class="row">
-        <div>
-            <ul class="nav nav-tabs" role="tablist">
-                <li class="nav-item">
-                    <a class="nav-link active" data-toggle="tab" href="#homeb" role="tab">Home</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" data-toggle="tab" href="#profileb" role="tab">Profile</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" data-toggle="tab" href="#messagesb" role="tab">Messages</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" data-toggle="tab" href="#settingsb" role="tab">Settings</a>
-                </li>
-            </ul>
-        </div>
-    </div>
-
- <div class="tab-content">
-    <div id="homeb" class="tab-pane fade in active">
-      <h3>HOME</h3>
-      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-    </div>
-    <div id="profileb" class="tab-pane fade">
-      <h3>Menu 1</h3>
-      <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-    </div>
-    <div id="messagesb" class="tab-pane fade">
-      <h3>Menu 2</h3>
-      <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam.</p>
-    </div>
-    <div id="settingsb" class="tab-pane fade">
-      <h3>Menu 3</h3>
-      <p>Eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
-    </div>
-  </div>
-
-
-
-
     </li>
     {% endfor %}
 </ul>
+
+    <p>
+    You can create these files following this
+    <a href="{{ url_for('material') }}" target="_blank">link</a>
+    </p>
+
+
+    <form method=post enctype=multipart/form-data>
+        <input type="hidden" name="next_step" value="confirm">
+            <div class="form-group">
+            <label for="materials_file">Zip file with the definitions of the materials above:</label>
+            <input type="file" class="form-control-file" id="materials_file" name="materials_file">
+        </div>
+
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>
 {% endblock %}

@@ -59,18 +59,43 @@
           </div>
     `;
     var choice_simple_solid = `
-          <div class="menu">
+        <div class="menu">
           <div class="form-group">
             <label for="ior">Index of refraction</label>
             <input type="text" class="form-control" id="ior" placeholder="Parameter" name="ior">
-        </div></div>
+          </div>
+        </div>
+        <input type="hidden" name="kind_of_material" value="simple_solid">
      `+choice_submit;
     var choice_pv_material = `
-    <div class="menu">Aqui PV material</div>
-     `;
+    <div class="menu">
+        <div class="form-group">
+            <label for="PV_file">Text file with PV data:</label>
+            <input type="file" class="form-control-file" id="PV_file" name="PV_file">
+        </div>
+    </div>
+        <input type="hidden" name="kind_of_material" value="PV_solid">
+     `+choice_submit;
     var choice_surface = `
-    <div class="menu">Aqui Surface</div>
+          <div class="menu">
+          <div class="form-group">
+               <label for="choice_surface">Kind of surface</label><br>
+              <select id="choice_surface" name="choice_surface" class="form-control">
+                  <option selected disabled>Choose one</option>
+                  <option value="choice_simple_symmetric_surface">Simple symmetric surface</option>
+              </select>
+          </div>
+          </div>
      `;
+    var choice_simple_symmetric_surface = `
+        <div class="menu">
+          <div class="form-group">
+            <label for="por">Probability of reflection</label>
+            <input type="text" class="form-control" id="por" placeholder="Parameter" name="por">
+          </div>
+        </div>
+        <input type="hidden" name="kind_of_material" value="simple_symmetric_surface">
+     `+choice_submit;
 
     $(document).ready(function(){
         $("#menus").html(choice1);
