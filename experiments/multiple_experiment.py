@@ -122,7 +122,7 @@ def experiment(data, root_folder):
 
     # Prepare pool of workers and feed it
     logger.info("number of cpus: %s", multiprocessing.cpu_count())
-    pool = multiprocessing.Pool(processes=1, initializer=init_counter, initargs=(finished_computations_counter,))
+    pool = multiprocessing.Pool(initializer=init_counter, initargs=(finished_computations_counter,))
     results = pool.map(compute, list_pars)
     logger.debug('finisehd pool.map %s, %s', len(results), len(list_pars))
 
