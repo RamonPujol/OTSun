@@ -3,6 +3,7 @@ from flask import Flask, request, redirect, render_template, send_from_directory
 import flask
 from uuid import uuid4
 import os
+import shutil
 import json
 import smtplib
 from email.mime.multipart import MIMEMultipart
@@ -108,14 +109,15 @@ def send_mail(toaddr, identifier):
     server.quit()
 
 
-def process_request(identifier):
+def process_request(identifier, should_send_mail = True):
     # Call the processing unit
     dirname = root_folder(identifier)
     datafile = json_file(identifier)
     process_experiment(datafile, dirname)
     # Send mail with link
     data = load_data(identifier)
-    send_mail(toaddr=data['email'], identifier=identifier)
+    if should_send_mail:
+        send_mail(toaddr=data['email'], identifier=identifier)
 
 
 def process_processor(identifier):
@@ -220,6 +222,19 @@ def material():
         filename = create_material(data, files)
         return flask.send_file(filename,as_attachment=True)
 
+def run_offline(identifier):
+    root1 = root_folder(identifier)
+    n = 1
+    while os.path.exists(root1+'-'+str(n)):
+        n += 1
+    identifier2 = identifier+'-'+str(n)
+    root2 = root1+'-'+str(n)
+    os.makedirs(root2)
+    shutil.copy(os.path.join(root1,'data.json'),os.path.join(root2,'data.json'))
+    shutil.copytree(os.path.join(root1,'files'),os.path.join(root2,'files'))
+    global URL_ROOT
+    process_request(identifier2, should_send_mail=False)
+    logger.info('Finished %s', identifier2)
 
 if __name__ == '__main__':
     logger = logging.getLogger()
