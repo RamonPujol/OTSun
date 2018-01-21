@@ -35,5 +35,7 @@ def processor(data, root_folder):
     data['solid_material_labels'] = list(set(solid_material_labels))
     data['faces_material_labels'] = list(set(faces_material_labels))
     logger.info("Found solids %s and faces %s", data['solid_material_labels'], data['faces_material_labels'])
+    FreeCAD.closeDocument(doc.Name)
+
     return data
 

@@ -163,7 +163,6 @@ def node(name, identifier=None):
                 data[file_id] = filename
         save_data(data, identifier)
         if 'processor' in data:
-            # TODO: process input
             new_data = process_processor(identifier)
             save_data(new_data, identifier)
         if 'next_step' in data:
