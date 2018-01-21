@@ -6,13 +6,17 @@ sys.path.append("/usr/lib/freecad")
 sys.path.append("/usr/lib/freecad/lib")
 import FreeCAD
 import raytrace
+import raytrace
 import numpy as np
 import time
-import shutil
+from shutil import copyfile
+import zipfile
+import dill
 import multiprocessing
 import json
 
-logger = logging.getLogger(__name__)
+#logging.getLogger().setLevel(logging.DEBUG)
+logger=logging.getLogger(__name__)
 
 finished_computations_counter = None
 
@@ -34,91 +38,82 @@ def update_percentage(partial, total):
         json.dump(data_status, fp)
 
 
-def computeX(args):
-    ph, th, w, number_of_rays, aperture_collector = args
-    logger.debug("experiment1X: %s, %s, %s", ph, th, w)
-    global finished_computations_counter
-    with finished_computations_counter.get_lock():
-        finished_computations_counter.value += 1
-    logger.debug('finished %s of %s computations', finished_computations_counter.value, total_computations)
-    return (ph, th, w, 0, 0, 0, 0)
-
-
 def compute(args):
-    # get parameters
-    ph, th, w, number_of_rays, aperture_collector = args
-    logger.debug("running experiment1 with: ph=%s, th=%s, w=%s", ph, th, w)
+    try:
+        # get parameters
+        ph, th, w, number_of_rays, aperture_collector = args
+        logger.debug("running experiment2 with: ph=%s, th=%s, w=%s, rays=%s, aperture=%s",
+                     ph, th, w, number_of_rays, aperture_collector)
 
-    # prepare experiment
-    main_direction = raytrace.polar_to_cartesian(ph, th) * -1.0  # Sun direction vector
-    emitting_region = raytrace.SunWindow(current_scene, main_direction)
-    l_s = raytrace.LightSource(current_scene, emitting_region, w, 1.0, None)
-    exp = raytrace.Experiment(current_scene, l_s, number_of_rays)
+        # prepare experiment
+        main_direction = raytrace.polar_to_cartesian(ph, th) * -1.0  # Sun direction vector
+        emitting_region = raytrace.SunWindow(current_scene, main_direction)
+        l_s = raytrace.LightSource(current_scene, emitting_region, w, 1.0, None)
+        logger.debug("defining experiment")
+        exp = raytrace.Experiment(current_scene, l_s, number_of_rays)
 
-    # run experiment and compute output
-    exp.run()
-    efficiency = (exp.captured_energy / aperture_collector) / (
-            exp.number_of_rays / exp.light_source.emitting_region.aperture)
+        # run experiment and compute output
+        logger.debug("running experiment")
+        exp.run()
+        logger.debug("experiment run")
+        efficiency = (exp.captured_energy / aperture_collector) / (
+                exp.number_of_rays / exp.light_source.emitting_region.aperture)
 
-    # update the number of finished computations
-    global finished_computations_counter
-    with finished_computations_counter.get_lock():
-        finished_computations_counter.value += 1
-        value = finished_computations_counter.value
-        if (value == total_computations) or ((value % (total_computations / 100)) == 0):
-            update_percentage(value, total_computations)
-        logger.debug('finished %s of %s computations', value, total_computations)
-
-    # return the results
-    return (ph, th, w, efficiency, exp.PV_energy, exp.PV_wavelength, exp.PV_values)
-
+        # update the number of finished computations
+        logger.debug("updating counters")
+        global finished_computations_counter
+        with finished_computations_counter.get_lock():
+            logger.debug("got lock")
+            finished_computations_counter.value += 1
+            value = finished_computations_counter.value
+            if (value == total_computations) or ((value % ((total_computations / 100)+1)) == 0):
+                update_percentage(value, total_computations)
+            logger.debug('finished %s of %s computations', value, total_computations)
+        logger.debug("returning results")
+        # return the results
+        return (ph, th, w, efficiency, exp.PV_energy, exp.PV_wavelength, exp.PV_values)
+    except:
+        logger.debug("Failed with parameters: %s", args)
 
 def experiment(data, root_folder):
     global current_scene
+    #global doc
 
-    # get parameters of the experiment from the data dict
-    phi1 = float(data['phi1']) + 0.000001  # 0 + 0.0000001 # TODO: pq sumar?
-    phi2 = float(data['phi2']) + 0.000001  # 0
-    phidelta = float(data['phidelta'])  # 0.1
-    theta1 = float(data['theta1']) + 0.000001  # 0 + 0.0000001 # TODO: pq sumar?
-    theta2 = float(data['theta2']) + 0.000001  # 0
-    thetadelta = float(data['thetadelta'])  # 0.1
-    number_of_rays = 10
-    aperture_collector = 1. * 1. * 1.0
-    lambda1 = float(data['lambda1'])  # # 295.0
-    lambda2 = float(data['lambda2'])  # # 810.5
-    lambdadelta = float(data['lambdadelta'])  # # 0.5
+    phi1 = float(data['phi1']) + 0.000001 #0 + 0.0000001 #
+    phi2 = float(data['phi2']) + 0.000001 #0
+    phidelta = float(data['phidelta']) #0.1
+    theta1 = float(data['theta1']) + 0.000001 #0 + 0.0000001
+    theta2 = float(data['theta2']) + 0.000001 #0
+    thetadelta = float(data['thetadelta']) #0.1
+    number_of_rays = int(data['numrays'])
+    aperture_collector = 1. * 1. * 1.0 # TODO: What is this?
+    lambda1 = float(data['lambda1']) # # 295.0
+    lambda2 = float(data['lambda2']) # # 810.5
+    lambdadelta = float(data['lambdadelta']) # # 0.5
     files_folder = os.path.join(root_folder, 'files')
     freecad_file = os.path.join(files_folder, data['freecad_file'])
-    PV_file = os.path.join(files_folder, data['PV_file'])
+    materials_file = os.path.join(files_folder, data['materials_file'])
+    with zipfile.ZipFile(materials_file) as z:
+        for matfile in z.namelist():
+            with z.open(matfile) as f:
+                mat = dill.load(f)
+                raytrace.Material.by_name[mat.name] = mat
 
-    logger.debug("in exp1", locals())
+    logger.debug("in experiment2", locals())
 
-    # open FreeCAD document
     FreeCAD.openDocument(freecad_file)
     doc = FreeCAD.ActiveDocument
 
-    # create materials
-    raytrace.create_reflector_lambertian_layer("rlamb", 1.0)
-    raytrace.create_two_layers_material("RLamb", "rlamb", "rlamb")
-    file_Si = PV_file
-    raytrace.create_PV_material("PV1", file_Si)
 
-    # prepare Scene
     sel = doc.Objects
     current_scene = raytrace.Scene(sel)
-    # data_file_spectrum = 'ASTMG173-direct.txt'
-    # light_spectrum = raytrace.create_CDF_from_PDF(data_file_spectrum)
-    # Buie_model = raytrace.BuieDistribution(0.05)
 
-    # Prepare input for multiprocessing
     list_pars = []
     for ph in np.arange(phi1, phi2, phidelta):
         for th in np.arange(theta1, theta2, thetadelta):
             for w in np.arange(lambda1, lambda2, lambdadelta):
                 list_pars.append((ph, th, w, number_of_rays, aperture_collector))
 
-    # Prepare shared counter of finished computations and status file
     finished_computations_counter = multiprocessing.Value('i', 0)
     global total_computations
     total_computations = len(list_pars)
@@ -127,7 +122,7 @@ def experiment(data, root_folder):
 
     # Prepare pool of workers and feed it
     logger.info("number of cpus: %s", multiprocessing.cpu_count())
-    pool = multiprocessing.Pool(initializer=init_counter, initargs=(finished_computations_counter,))
+    pool = multiprocessing.Pool(processes=1, initializer=init_counter, initargs=(finished_computations_counter,))
     results = pool.map(compute, list_pars)
     logger.debug('finisehd pool.map %s, %s', len(results), len(list_pars))
 
@@ -172,6 +167,5 @@ def experiment(data, root_folder):
         outfile_Source_lambdas.write("%s %s" % (number_of_rays, "# Rays per wavelength") + '\n')
         outfile_Source_lambdas.write("%s %s" % (lambdadelta, "# Step of wavelength in nm") + '\n')
         np.savetxt(outfile_Source_lambdas, data_source_lambdas, fmt=['%f'])
-
     # Prepare zipfile
-#    shutil.make_archive(destfolder, 'zip', destfolder)
+    #    shutil.make_archive(destfolder, 'zip', destfolder)
