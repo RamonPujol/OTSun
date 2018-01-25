@@ -25,6 +25,8 @@ def processor(data, root_folder):
         label = obj.Label
         start = label.find("(")
         end = label.find(")")
+        if (start == -1) or (end == -1):
+            continue
         name = label[start + 1:end]
         solids = obj.Shape.Solids
         faces = obj.Shape.Faces
