@@ -7,4 +7,8 @@
     Status: {{ data_status['status'] }}
     <br>
     Percentage of computation: {{ data_status['percentage'] }}&#37;
+    <br>
+    {% if data_status['status'] == 'finished' %}
+        Get the results <a href="{{ url_for('send_file', identifier=identifier ) }}">here.</a>
+    {% endif %}
 {% endblock %}
