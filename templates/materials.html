@@ -83,6 +83,7 @@
               <select id="choice_surface" name="choice_surface" class="form-control">
                   <option selected disabled>Choose one</option>
                   <option value="choice_simple_symmetric_surface">Simple symmetric surface</option>
+                  <option value="choice_simple_absorber_surface">Simple absorber surface</option>
               </select>
           </div>
           </div>
@@ -95,6 +96,15 @@
           </div>
         </div>
         <input type="hidden" name="kind_of_material" value="simple_symmetric_surface">
+     `+choice_submit;
+    var choice_simple_absorber_surface = `
+        <div class="menu">
+          <div class="form-group">
+            <label for="por">Probability of absortion</label>
+            <input type="text" class="form-control" id="poa" placeholder="Parameter" name="poa">
+          </div>
+        </div>
+        <input type="hidden" name="kind_of_material" value="simple_absorber_surface">
      `+choice_submit;
 
     $(document).ready(function(){
