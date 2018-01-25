@@ -88,8 +88,11 @@ def experiment(data, root_folder):
     with zipfile.ZipFile(materials_file) as z:
         for matfile in z.namelist():
             with z.open(matfile) as f:
-                mat = dill.load(f)
-                raytrace.Material.by_name[mat.name] = mat
+                try:
+                    mat = dill.load(f)
+                    raytrace.Material.by_name[mat.name] = mat
+                except:
+                    pass
 
     logger.debug("in experiment3", locals())
 
@@ -129,7 +132,10 @@ def experiment(data, root_folder):
     # results = pool.map(compute, list_pars)
     # logger.debug('finisehd pool.map %s, %s', len(results), len(list_pars))
     destfolder = os.path.join(root_folder, 'output')
-    os.makedirs(destfolder)
+    try:
+        os.makedirs(destfolder)
+    except:
+        pass # we suppose it already exists
 
     all_obj = doc.Objects
     for obj in all_obj:
@@ -168,8 +174,7 @@ def experiment(data, root_folder):
     with open(os.path.join(destfolder, 'PV-10000-CAS4-kk.txt'), 'w') as outfile_PV:
         np.savetxt(outfile_PV, datacomp, fmt=['%f', '%f'])
     with open(os.path.join(destfolder, 'PV_values_1micro.txt'), 'w') as outfile_PV_values:
-        np.savetxt(outfile_PV_values, data_PV_values,
-                   fmt=['%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f'])
+        np.savetxt(outfile_PV_values, data_PV_values)
     with open(os.path.join(destfolder, 'Source_lambdas_1micro.txt'), 'w') as outfile_Source_lambdas:
         outfile_Source_lambdas.write("%s %s" % (aperture_collector * 0.001 * 0.001,
                                                 "# Collector aperture in m2") + '\n')

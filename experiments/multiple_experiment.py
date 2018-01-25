@@ -93,11 +93,14 @@ def experiment(data, root_folder):
     files_folder = os.path.join(root_folder, 'files')
     freecad_file = os.path.join(files_folder, data['freecad_file'])
     materials_file = os.path.join(files_folder, data['materials_file'])
-    with zipfile.ZipFile(materials_file) as z:
+    with zipfile.ZipFile(materials_file) as z: # TODO: Put it in a separate file
         for matfile in z.namelist():
             with z.open(matfile) as f:
-                mat = dill.load(f)
-                raytrace.Material.by_name[mat.name] = mat
+                try:
+                    mat = dill.load(f)
+                    raytrace.Material.by_name[mat.name] = mat
+                except:
+                    pass
 
     logger.debug("in experiment2", locals())
 
