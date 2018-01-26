@@ -8,40 +8,16 @@ import FreeCAD
 import raytrace
 import raytrace
 import numpy as np
-import time
-from shutil import copyfile
-import zipfile
-import dill
 import multiprocessing
-import json
+from utils.statuslogger import StatusLogger
 
-#logging.getLogger().setLevel(logging.DEBUG)
 logger=logging.getLogger(__name__)
-
-finished_computations_counter = None
-
-
-def init_counter(args):
-    """ store the counter for later use """
-    global finished_computations_counter
-    finished_computations_counter = args
-
-def update_percentage(partial, total):
-    percentage = (100 * partial) / total
-    logger.debug('experiment is at %s percent', percentage)
-    data_status = {'percentage': percentage}
-    if partial == total:
-        data_status['status'] = 'finished'
-    else:
-        data_status['status'] = 'running'
-    with open(status_file, 'w') as fp:
-        json.dump(data_status, fp)
 
 
 def compute(args):
     try:
         # get parameters
-        ph, th, w, number_of_rays, aperture_collector = args
+        ph, th, w, number_of_rays, aperture_collector, statuslogger = args
         logger.debug("running experiment2 with: ph=%s, th=%s, w=%s, rays=%s, aperture=%s",
                      ph, th, w, number_of_rays, aperture_collector)
 
@@ -61,14 +37,7 @@ def compute(args):
 
         # update the number of finished computations
         logger.debug("updating counters")
-        global finished_computations_counter
-        with finished_computations_counter.get_lock():
-            logger.debug("got lock")
-            finished_computations_counter.value += 1
-            value = finished_computations_counter.value
-            if (value == total_computations) or ((value % ((total_computations / 100)+1)) == 0):
-                update_percentage(value, total_computations)
-            logger.debug('finished %s of %s computations', value, total_computations)
+        statuslogger.increment()
         logger.debug("returning results")
         # return the results
         return (ph, th, w, efficiency, exp.PV_energy, exp.PV_wavelength, exp.PV_values)
@@ -96,15 +65,6 @@ def experiment(data, root_folder):
 
     raytrace.Material.load_from_zipfile(materials_file)
 
-    # with zipfile.ZipFile(materials_file) as z: # TODO: Put it in a separate file
-    #     for matfile in z.namelist():
-    #         with z.open(matfile) as f:
-    #             try:
-    #                 mat = dill.load(f)
-    #                 raytrace.Material.by_name[mat.name] = mat
-    #             except:
-    #                 pass
-
     logger.debug("in experiment2", locals())
 
     FreeCAD.openDocument(freecad_file)
@@ -114,21 +74,20 @@ def experiment(data, root_folder):
     sel = doc.Objects
     current_scene = raytrace.Scene(sel)
 
+    manager = multiprocessing.Manager()
+    statuslogger = StatusLogger(manager, 0, root_folder)
+
     list_pars = []
     for ph in np.arange(phi1, phi2, phidelta):
         for th in np.arange(theta1, theta2, thetadelta):
             for w in np.arange(lambda1, lambda2, lambdadelta):
-                list_pars.append((ph, th, w, number_of_rays, aperture_collector))
+                list_pars.append((ph, th, w, number_of_rays, aperture_collector, statuslogger))
 
-    finished_computations_counter = multiprocessing.Value('i', 0)
-    global total_computations
-    total_computations = len(list_pars)
-    global status_file
-    status_file = os.path.join(root_folder, 'status.json')
+    statuslogger.total = len(list_pars)
 
     # Prepare pool of workers and feed it
     logger.info("number of cpus: %s", multiprocessing.cpu_count())
-    pool = multiprocessing.Pool(initializer=init_counter, initargs=(finished_computations_counter,))
+    pool = multiprocessing.Pool()
     results = pool.map(compute, list_pars)
     logger.debug('finisehd pool.map %s, %s', len(results), len(list_pars))
 
