@@ -12,6 +12,7 @@ cp -r /vagrant/*wsgi ./
 cp -r /vagrant/templates ./
 cp -r /vagrant/experiments ./
 cp -r /vagrant/processors ./
+cp -r /vagrant/utils ./
 virtualenv venv
 source venv/bin/activate
 which python
