@@ -8,7 +8,7 @@ import FreeCAD
 import raytrace
 import numpy as np
 import multiprocessing
-from utils.statuslogger import StatusLogger
+from webappsunscene.utils.statuslogger import StatusLogger
 
 logger=logging.getLogger(__name__)
 

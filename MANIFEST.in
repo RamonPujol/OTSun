@@ -1,0 +1,2 @@
+recursive-include webappsunscene/templates *
+recursive-include webappsunscene/experiments/data *
