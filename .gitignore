@@ -12,3 +12,4 @@ venv_vanilla
 venv_vagrant (1)
 Vagrantfile
 venv_new
+dist
