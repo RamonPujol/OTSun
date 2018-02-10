@@ -6,7 +6,6 @@ sys.path.append("/usr/lib/freecad")
 sys.path.append("/usr/lib/freecad/lib")
 import FreeCAD
 import raytrace
-import raytrace
 import numpy as np
 import multiprocessing
 from utils.statuslogger import StatusLogger
@@ -124,8 +123,8 @@ def experiment(data, root_folder):
     with open(os.path.join(destfolder, 'PV-10000-CAS4-kk.txt'), 'w') as outfile_PV:
         np.savetxt(outfile_PV, datacomp, fmt=['%f', '%f'])
     with open(os.path.join(destfolder, 'PV_values_1micro.txt'), 'w') as outfile_PV_values:
-        np.savetxt(outfile_PV_values, data_PV_values,
-                   fmt=['%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f'])
+        np.savetxt(outfile_PV_values, data_PV_values) #,
+                   #fmt=['%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f'])
     with open(os.path.join(destfolder, 'Source_lambdas_1micro.txt'), 'w') as outfile_Source_lambdas:
         outfile_Source_lambdas.write("%s %s" % (aperture_collector * 0.001 * 0.001,
                                                 "# Collector aperture in m2") + '\n')
