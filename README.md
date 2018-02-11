@@ -1,6 +1,53 @@
 # WebAppSunScene
 
-## Web routes
+## Installation
+
+### 1. Installing the package
+
+- Create a folder inside an user account: ``mkdir /home/theuser/webappsunscene``
+- Move inside that folder: ``cd /home/theuser/webappsunscene``
+- create a virtualenv: ``virtualenv venv``
+- Activate the virtual environment: `source venv/bin/activate`
+- Get ``webappsunscene-X.X.tar.gz`` and uncompress it in a temporary folder:
+`tar -xzvf webappsunscene-X.X.tar.gz`
+- Move inside the created folder:
+``cd WebAppSunScene-X.X``
+- Install the package along with its dependencies: ``python setup.py install``
+
+### 2. Install the webtool
+
+- Create a wsgi file ``/home/theuser/webapp/webappsunscene/webappsunscene.wsgi`` with contents
+    ```
+    from webappsunscene import app as application
+    ```
+- For apache2 servers:
+
+  - Enable the wsgi mod: `a2enmod wsgi`
+  - Change the default site file, located in 
+  `/etc/apache2/sites-available/000-default.conf`
+  and make sure it contains (tune it to your needs):
+    ```
+    <VirtualHost *:80>
+    ServerName example.com 
+
+    WSGIDaemonProcess webappsunscene user=theuser group=theuser python-home=/home/theuser/webappsunscene/venv
+    WSGIScriptAlias /webappsunscene /home/theuser/webappsunscene/webappsunscene.wsgi
+    <Directory /home/theuser/webappsunscene>
+        WSGIApplicationGroup %{GLOBAL}
+        WSGIProcessGroup webappsunscene
+        Order deny,allow
+        Allow from all
+	Require all granted
+    </Directory>
+
+    </VirtualHost>
+    ```
+  - Restart the server: `service apache2 restart`
+  
+
+## Adding new features (Architecture)
+
+### Web routes
 
 The WebApp uses the python library flask for its backend.
 
@@ -42,7 +89,7 @@ gives the current status of the computation.
 - `/results/<identifier>` : The user gets the results 
 in a zip file `output.zip`.
 
-## Processing unit
+### Processing unit
 
 The computation process is initiated when the user 
 confirms the data in the `/node/confirm/<identifier>`
@@ -64,11 +111,13 @@ The guidelines for implementing such a module are:
   * `data` is a dictionary with the data given by the user
   * `rootfolder` is the name of the root folder of the experiment
 * The files uploaded by the user are in `rootfolder/files`
-* The output files must be put in `rootfolder/output
+* The output files must be put in `rootfolder/output`
 * The file `rootfolder/status.json` must contain a json object with
 structure:
     * key: `status`; 
     value: `started`, `running`, `finished` or `error`
     * key: `percentage`; value: number in the range 0..100 giving
 the percentage of computation that is currently completed.
+* A helper module ``webappsunscene.utils.statuslogger`` 
+creates the ``status.json`` file and handle its updates.
 
