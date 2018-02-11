@@ -135,13 +135,13 @@ def experiment(data, root_folder):
     # ---
     data_source_wavelength = np.array(np.concatenate(source_wavelength))
     data_source_wavelength = data_source_wavelength.T
-    source_wavelengths_file = os.path.join(destfolder,'source_wavelengths-a.txt')
-    with open(source_wavelengths_file,'w') as outfile_source_wavelengths:
+    source_wavelengths_file = os.path.join(destfolder, 'source_wavelengths-a.txt')
+    with open(source_wavelengths_file, 'w') as outfile_source_wavelengths:
         outfile_source_wavelengths.write(
-            "%s %s\n" % (aperture_th * 0.001 * 0.001, "# Collector Th aperture in m2") )
+            "%s %s\n" % (aperture_th * 0.001 * 0.001, "# Collector Th aperture in m2"))
         outfile_source_wavelengths.write(
-            "%s %s\n" % (aperture_pv * 0.001 * 0.001, "# Collector PV aperture in m2") )
-        outfile_source_wavelengths.write("%s %s\n" % (number_of_rays, "# Rays per wavelength") )
+            "%s %s\n" % (aperture_pv * 0.001 * 0.001, "# Collector PV aperture in m2"))
+        outfile_source_wavelengths.write("%s %s\n" % (number_of_rays, "# Rays per wavelength"))
         outfile_source_wavelengths.write("%s %s\n" % (wavelength_step, "# Step of wavelength in nm"))
         np.savetxt(outfile_source_wavelengths, data_source_wavelength, fmt=['%f'])
 
@@ -175,18 +175,18 @@ def experiment(data, root_folder):
         power_absorbed_from_source_Th = np.trapz(spectrum_by_table_Th, x=source_spectrum[:, 0])
         efficiency_from_source_Th = power_absorbed_from_source_Th / energy_emitted
 
-        with open(os.path.join(destfolder,'Th_spectral_efficiency-a.txt'),'w') as outfile_Th_spectral:
+        with open(os.path.join(destfolder, 'Th_spectral_efficiency-a.txt'), 'w') as outfile_Th_spectral:
             outfile_Th_spectral.write("%s %s\n" % ("# wavelength(nm)   ;   ", "efficiency Th absorbed",))
             np.savetxt(outfile_Th_spectral, table_Th, fmt=['%f', '%f'])
 
-        with open(os.path.join(destfolder, 'Th_points_absorber-a.txt'),'w') as outfile_Th_points_absorber:
+        with open(os.path.join(destfolder, 'Th_points_absorber-a.txt'), 'w') as outfile_Th_points_absorber:
             outfile_Th_points_absorber.write("%s %s %s %s\n" % (
                 "# Energy ray;   ", "point on absorber [3];   ",
                 "previous point [3];   ", "normal at absorber face [3]"))
             np.savetxt(outfile_Th_points_absorber, data_Th_points_absorber,
                        fmt=['%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f'])
 
-        with open(os.path.join(destfolder,'Th_integral_spectrum-a.txt'),'w') as outfile_Th_integral_spectrum:
+        with open(os.path.join(destfolder, 'Th_integral_spectrum-a.txt'), 'w') as outfile_Th_integral_spectrum:
             outfile_Th_integral_spectrum.write("%s %s %s\n" % (
                 "# power_absorbed_from_source_Th;   ", "energy_emitted;   ", "efficiency_from_source_Th;   "))
             outfile_Th_integral_spectrum.write("%s %s %s\n" % (
@@ -221,11 +221,11 @@ def experiment(data, root_folder):
         SR = raytrace.spectral_response(table_PV, iqe)
         ph_cu = raytrace.photo_current(SR, source_spectrum)
 
-        with open(os.path.join(destfolder,'PV_spectral_efficiency-a.txt'),'w') as outfile_PV_spectral:
+        with open(os.path.join(destfolder, 'PV_spectral_efficiency-a.txt'), 'w') as outfile_PV_spectral:
             outfile_PV_spectral.write("%s %s\n" % ("# wavelength(nm)    ;   ", "efficiency PV absorbed",))
             np.savetxt(outfile_PV_spectral, table_PV, fmt=['%f', '%f'])
 
-        with open(os.path.join(destfolder,'PV_paths_values-a.txt'),'w') as outfile_PV_paths_values:
+        with open(os.path.join(destfolder, 'PV_paths_values-a.txt'), 'w') as outfile_PV_paths_values:
             outfile_PV_paths_values.write("%s %s %s %s %s %s %s\n" % (
                 "# first point in PV [3];   ", "second point in PV [3];   ", "energy ray first point;   ",
                 "energy ray second point;   ", "wavelength ray (nm);   ", "absorption coefficient alpha  (mm-1);",
@@ -250,10 +250,3 @@ def experiment(data, root_folder):
     # --------- end
     # t4 = time.time()
     # print t4 - t3
-
-
-
-
-
-
-
