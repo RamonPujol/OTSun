@@ -16,7 +16,9 @@ def create_material(data,files):
     logger.debug(data)
     kind_of_material = data['kind_of_material']
     if kind_of_material == 'constant_ior':
-        raytrace.create_simple_volume_material(data['name'], float(data['ior']))
+        raytrace.create_simple_volume_material(data['name'],
+                                                    float(data['ior']),
+                                                    None if data['ex_co'] == None else float(data['ex_co']))
     elif kind_of_material == 'variable_ior':
         raytrace.create_wavelength_volume_material(data['name'], files['ior_file'])
     elif kind_of_material == 'PV_volume':
@@ -35,21 +37,31 @@ def create_material(data,files):
                                                 float(data['b_constant']),
                                                 float(data['c_constant']))
     elif kind_of_material == 'reflector_specular_layer':
-        raytrace.create_reflector_specular_layer(data['name'], float(data['por']))
+        raytrace.create_reflector_specular_layer(data['name'],
+                                                    float(data['por']),
+                                                    None if data['sigma_1'] == None else float(data['sigma_1']),
+                                                    None if data['sigma_2'] == None else float(data['sigma_2']),
+                                                    None if data['k'] == None else float(data['k']))
     elif kind_of_material == 'reflector_lambertian_layer':
         raytrace.create_reflector_lambertian_layer(data['name'], float(data['por']))
-    elif kind_of_material == 'reflector_onegaussian_layer':
-        raytrace.create_reflector_onegaussian_layer(data['name'], float(data['por']), float(data['sigma']))
-    elif kind_of_material == 'reflector_twogaussian_layer':
-        raytrace.create_reflector_twogaussian_layer(data['name'],
-                                                    float(data['por']),
-                                                    float(data['sigma_1']),
-                                                    float(data['sigma_2']),
-                                                    float(data['k']))
+    elif kind_of_material == 'metallic_specular_layer':
+        raytrace.create_metallic_specular_layer(data['name'],
+                                                    files['ior_file'],
+                                                    None if data['sigma_1'] == None else float(data['sigma_1']),
+                                                    None if data['sigma_2'] == None else float(data['sigma_2']),
+                                                    None if data['k'] == None else float(data['k']))    
+    elif kind_of_material == 'polarized_coating_reflector_layer':
+        raytrace.create_polarized_coating_reflector_layer(data['name'], files['coating_file'])
     elif kind_of_material == 'polarized_coating_transparent_layer':
         raytrace.create_polarized_coating_transparent_layer(data['name'], files['coating_file'])
     elif kind_of_material == 'polarized_coating_absorber_layer':
         raytrace.create_polarized_coating_absorber_layer(data['name'], files['coating_file'])
+    elif kind_of_material == 'two_layers_material':
+        mat_front = Material.load_from_file(file_front)
+        mat_back = Material.load_from_file(file_back)
+        name_front = mat_front.name
+        name_back = mat_back.name
+        raytrace.create_polarized_coating_absorber_layer(data['name'], name_front, name_back)
     elif kind_of_material == 'simple_symmetric_surface':
         raytrace.create_reflector_lambertian_layer("rlamb", float(data['por']))
         raytrace.create_two_layers_material(data['name'], "rlamb", "rlamb")

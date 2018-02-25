@@ -66,6 +66,8 @@
           <div class="form-group">
             <label for="ior">Index of refraction</label>
             <input type="text" class="form-control" id="ior" placeholder="Parameter" name="ior">
+            <label for="ex_co">Extinction coefficient</label>
+            <input type="text" class="form-control" id="ex_co" placeholder="Parameter" name="ex_co">			
           </div>
         </div>
         <input type="hidden" name="kind_of_material" value="constant_ior">
@@ -99,15 +101,16 @@
                   <option selected disabled>Choose one</option>
                   <option value="choice_opaque_simple_layer">Opaque simple layer</option>
                   <option value="choice_transparent_simple_layer">Transparent simple layer</option>
+                  <option value="choice_polarized_coating_transparent_layer">Transparent polarized coating layer</option>
                   <option value="choice_absorber_simple_layer">Absorber simple layer</option>
                   <option value="choice_absorber_lambertian_layer">Absorber lambertian layer</option>
                   <option value="choice_absorber_TW_model_layer">Absorber TW model layer</option>
+                  <option value="choice_polarized_coating_absorber_layer">Absorber polarized coating layer</option>
                   <option value="choice_reflector_specular_layer">Reflector specular layer</option>
                   <option value="choice_reflector_lambertian_layer">Reflector lambertian layer</option>
-                  <option value="choice_reflector_onegaussian_layer">Reflector one gaussian specular layer</option>
-                  <option value="choice_reflector_twogaussian_layer">Reflector two gaussian specular layer</option>
-                  <option value="choice_polarized_coating_transparent_layer">Polarized coating transparent layer</option>
-                  <option value="choice_polarized_coating_absorber_layer">Polarized coating absorber layer</option>
+                  <option value="choice_metallic_specular_layer">Reflector metallic layer</option>
+                  <option value="choice_polarized_coating_reflector_layer">Reflector polarized coating layer</option>
+                  <option value="choice_two_layers_material">Create material from two layers</option>
                   <option value="choice_simple_symmetric_surface">Simple symmetric surface</option>
                   <option value="choice_simple_absorber_surface">Simple absorber surface</option>
               </select>
@@ -168,6 +171,12 @@
           <div class="form-group">
             <label for="por">Probability of reflection</label>
             <input type="text" class="form-control" id="por" placeholder="Parameter" name="por">
+            <label for="sigma_1">sigma_1 [mrad], empty if not sigma_1 distribution</label>
+            <input type="text" class="form-control" id="sigma_1" placeholder="Parameter" name="sigma_1">
+            <label for="sigma_2">sigma_2 [mrad], empty if not sigma_2 distribution</label>
+            <input type="text" class="form-control" id="sigma_2" placeholder="Parameter" name="sigma_2">
+            <label for="k">weight for sigma_1 distribution, empty if not sigma_2 distribution</label>
+            <input type="text" class="form-control" id="k" placeholder="Parameter" name="k">
           </div>
         </div>
         <input type="hidden" name="kind_of_material" value="reflector_specular_layer">
@@ -182,33 +191,31 @@
         </div>
         <input type="hidden" name="kind_of_material" value="reflector_lambertian_layer">
      `+choice_submit;
-
-	 var choice_reflector_onegaussian_layer = `
+	 
+	 var choice_metallic_specular_layer = `
         <div class="menu">
           <div class="form-group">
-            <label for="por">Probability of reflection</label>
-            <input type="text" class="form-control" id="por" placeholder="Parameter" name="por">
-            <label for="sigma">sigma [mrad]</label>
-            <input type="text" class="form-control" id="sigma" placeholder="Parameter" name="sigma">
-          </div>
-        </div>
-        <input type="hidden" name="kind_of_material" value="reflector_onegaussian_layer">
-     `+choice_submit;
-
-	 var choice_reflector_twogaussian_layer = `
-        <div class="menu">
-          <div class="form-group">
-            <label for="por">Probability of reflection</label>
-            <input type="text" class="form-control" id="por" placeholder="Parameter" name="por">
-            <label for="sigma_1">sigma_1 [mrad]</label>
+            <label for="ior_file">Text file with refractive index data:</label>
+            <input type="file" class="form-control-file" id="ior_file" name="ior_file">
+            <label for="sigma_1">sigma_1 [mrad], empty if not sigma_1 distribution</label>
             <input type="text" class="form-control" id="sigma_1" placeholder="Parameter" name="sigma_1">
-            <label for="sigma_2">sigma_2 [mrad]</label>
+            <label for="sigma_2">sigma_2 [mrad], empty if not sigma_2 distribution</label>
             <input type="text" class="form-control" id="sigma_2" placeholder="Parameter" name="sigma_2">
-            <label for="k">weight for sigma_1 distribution</label>
+            <label for="k">weight for sigma_1 distribution, empty if not sigma_2 distribution</label>
             <input type="text" class="form-control" id="k" placeholder="Parameter" name="k">
           </div>
         </div>
-        <input type="hidden" name="kind_of_material" value="reflector_twogaussian_layer">
+        <input type="hidden" name="kind_of_material" value="metallic_specular_layer">
+     `+choice_submit;
+
+	 var choice_polarized_coating_reflector_layer = `
+        <div class="menu">
+          <div class="form-group">
+            <label for="coating_file">Coating reflector file</label>
+            <input type="file" class="form-control-file" id="coating_file" name="coating_file">
+          </div>
+        </div>
+        <input type="hidden" name="kind_of_material" value="polarized_coating_reflector_layer">
      `+choice_submit;
 
 	 var choice_polarized_coating_transparent_layer = `
@@ -231,6 +238,20 @@
         <input type="hidden" name="kind_of_material" value="polarized_coating_absorber_layer">
      `+choice_submit;
 
+	 var choice_two_layers_material = `
+        <div class="menu">
+          <div class="form-group">
+            <label for="name">Surface with different front and back layers</label>
+            <input type="text" class="form-control" id="name" placeholder="Parameter" name="name">
+            <label for="layer_front">Front_layer_name.rtmaterial file</label>
+            <input type="file" class="form-control-file" id="file_front" name="file_front">
+            <label for="layer_back">Back_layer_name.rtmaterial file</label>
+            <input type="file" class="form-control-file" id="file_back" name="file_back">
+          </div>
+        </div>
+        <input type="hidden" name="kind_of_material" value="two_layers_material">
+     `+choice_submit;
+	 
 	 var choice_simple_symmetric_surface = `
         <div class="menu">
           <div class="form-group">
