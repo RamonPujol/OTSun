@@ -7,7 +7,7 @@
 - Create a folder inside an user account: ``mkdir /home/theuser/webappsunscene``
 - Move inside that folder: ``cd /home/theuser/webappsunscene``
 - create a virtualenv: ``virtualenv venv``
-- Activate the virtual environment: `source venv/bin/activate`
+- Activate the virtual environment: `source venv/bin/activate` 
 - Get ``webappsunscene-X.X.tar.gz`` and install it (and its dependencies) using `pip`
 `pip install webappsunscene-X.X.tar.gz`
 
