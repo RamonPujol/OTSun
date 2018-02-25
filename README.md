@@ -8,11 +8,8 @@
 - Move inside that folder: ``cd /home/theuser/webappsunscene``
 - create a virtualenv: ``virtualenv venv``
 - Activate the virtual environment: `source venv/bin/activate`
-- Get ``webappsunscene-X.X.tar.gz`` and uncompress it in a temporary folder:
-`tar -xzvf webappsunscene-X.X.tar.gz`
-- Move inside the created folder:
-``cd WebAppSunScene-X.X``
-- Install the package along with its dependencies: ``python setup.py install``
+- Get ``webappsunscene-X.X.tar.gz`` and install it (and its dependencies) using `pip`
+`pip install webappsunscene-X.X.tar.gz`
 
 ### 2. Install the webtool
 
