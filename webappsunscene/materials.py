@@ -57,8 +57,8 @@ def create_material(data,files):
     elif kind_of_material == 'polarized_coating_absorber_layer':
         raytrace.create_polarized_coating_absorber_layer(data['name'], files['coating_file'])
     elif kind_of_material == 'two_layers_material':
-        mat_front = Material.load_from_file(file_front)
-        mat_back = Material.load_from_file(file_back)
+        mat_front = raytrace.Material.load_from_file(file_front)
+        mat_back = raytrace.Material.load_from_file(file_back)
         name_front = mat_front.name
         name_back = mat_back.name
         raytrace.create_polarized_coating_absorber_layer(data['name'], name_front, name_back)
