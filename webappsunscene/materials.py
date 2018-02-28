@@ -39,17 +39,17 @@ def create_material(data,files):
     elif kind_of_material == 'reflector_specular_layer':
         raytrace.create_reflector_specular_layer(data['name'],
                                                     float(data['por']),
-                                                    None if data['sigma_1'] == None else float(data['sigma_1']),
-                                                    None if data['sigma_2'] == None else float(data['sigma_2']),
-                                                    None if data['k'] == None else float(data['k']))
+                                                    None if data['sigma_1'] == '' else float(data['sigma_1']),
+                                                    None if data['sigma_2'] == '' else float(data['sigma_2']),
+                                                    None if data['k'] == '' else float(data['k']))
     elif kind_of_material == 'reflector_lambertian_layer':
         raytrace.create_reflector_lambertian_layer(data['name'], float(data['por']))
     elif kind_of_material == 'metallic_specular_layer':
         raytrace.create_metallic_specular_layer(data['name'],
                                                     files['ior_file'],
-                                                    None if data['sigma_1'] == None else float(data['sigma_1']),
-                                                    None if data['sigma_2'] == None else float(data['sigma_2']),
-                                                    None if data['k'] == None else float(data['k']))    
+                                                    None if data['sigma_1'] == '' else float(data['sigma_1']),
+                                                    None if data['sigma_2'] == '' else float(data['sigma_2']),
+                                                    None if data['k'] == '' else float(data['k']))
     elif kind_of_material == 'polarized_coating_reflector_layer':
         raytrace.create_polarized_coating_reflector_layer(data['name'], files['coating_file'])
     elif kind_of_material == 'polarized_coating_transparent_layer':
