@@ -2,6 +2,7 @@ import io
 import logging
 import sys
 import os
+from uuid import uuid4
 sys.path.append("/usr/lib/freecad")
 sys.path.append("/usr/lib/freecad/lib")
 import FreeCAD
@@ -11,6 +12,15 @@ import time
 import dill
 
 logger=logging.getLogger(__name__)
+
+UPLOAD_FOLDER = '/tmp/WebAppSunScene'
+if not os.path.exists(UPLOAD_FOLDER):
+    logger.info('creating upload folder')
+    os.makedirs(UPLOAD_FOLDER)
+else:
+    if not os.access(UPLOAD_FOLDER, os.W_OK):
+        UPLOAD_FOLDER += str(uuid4())
+        os.makedirs(UPLOAD_FOLDER)
 
 def create_material(data,files):
     logger.debug(data)
@@ -57,18 +67,23 @@ def create_material(data,files):
     elif kind_of_material == 'polarized_coating_absorber_layer':
         raytrace.create_polarized_coating_absorber_layer(data['name'], files['coating_file'])
     elif kind_of_material == 'two_layers_material':
-        mat_front = raytrace.Material.load_from_file(file_front)
-        mat_back = raytrace.Material.load_from_file(file_back)
-        name_front = mat_front.name
-        name_back = mat_back.name
-        raytrace.create_polarized_coating_absorber_layer(data['name'], name_front, name_back)
+        # name_front = raytrace.Material.load_from_file(files['file_front'])
+        # name_back = raytrace.Material.load_from_file(files['file_back'])
+        mat_front = dill.load(files['file_front'])
+        mat_back = dill.load(files['file_back'])
+        raytrace.Material.by_name[mat_back.name] = mat_back
+        raytrace.Material.by_name[mat_front.name] = mat_front
+        raytrace.create_two_layers_material(data['name'], mat_front.name, mat_back.name)
     elif kind_of_material == 'simple_symmetric_surface':
         raytrace.create_reflector_lambertian_layer("rlamb", float(data['por']))
         raytrace.create_two_layers_material(data['name'], "rlamb", "rlamb")
     elif kind_of_material == 'simple_absorber_surface':
         raytrace.create_absorber_simple_material(data['name'], 1-float(data['poa']))
     material = raytrace.Material.by_name[data['name']]
-    filename = '/tmp/'+data['name']+'.rtmaterial'
+    temp_folder = os.path.join(UPLOAD_FOLDER, str(uuid4()))
+    os.makedirs(temp_folder)
+    filename = os.path.join(temp_folder, data['name']+'.rtmaterial')
+    # filename = '/tmp/'+data['name']+'.rtmaterial'
     with open(filename, 'wb') as f:
         dill.dump(material, f)
     return filename
