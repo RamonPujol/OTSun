@@ -34,7 +34,7 @@
           <div class="menu">
           <div class="form-group">
             <label for="name">Identifier of material to create</label>
-            <input type="text" class="form-control" id="name" placeholder="Name" name="name">
+            <input type="text" required="true" class="form-control" id="name" placeholder="Name" name="name">
           </div>
           <div class="form-group">
               <label for="choice1">Kind of material</label><br>
@@ -65,9 +65,9 @@
         <div class="menu">
           <div class="form-group">
             <label for="ior">Index of refraction</label>
-            <input type="text" class="form-control" id="ior" placeholder="Parameter" name="ior">
+            <input type="number" step="any" required="true" class="form-control" id="ior" placeholder="Parameter" name="ior">
             <label for="ex_co">Extinction coefficient</label>
-            <input type="text" class="form-control" id="ex_co" placeholder="Parameter" name="ex_co">			
+            <input type="number" step="any" required="true" class="form-control" id="ex_co" placeholder="Parameter" name="ex_co">
           </div>
         </div>
         <input type="hidden" name="kind_of_material" value="constant_ior">
@@ -77,17 +77,17 @@
     <div class="menu">
         <div class="form-group">
             <label for="ior_file">Text file with refractive index data:</label>
-            <input type="file" class="form-control-file" id="ior_file" name="ior_file">
+            <input type="file" required="true" class="form-control-file" id="ior_file" name="ior_file">
         </div>
     </div>
-        <input type="hidden" name="kind_of_material" value="variable_ior">
+        <input type="hidden" required="true" name="kind_of_material" value="variable_ior">
      `+choice_submit;
 
     var choice_PV_volume = `
     <div class="menu">
         <div class="form-group">
             <label for="PV_file">Text file with PV data:</label>
-            <input type="file" class="form-control-file" id="PV_file" name="PV_file">
+            <input type="file" required="true" class="form-control-file" id="PV_file" name="PV_file">
         </div>
     </div>
         <input type="hidden" name="kind_of_material" value="PV_volume">
@@ -126,7 +126,7 @@
         <div class="menu">
           <div class="form-group">
             <label for="pot">Probability of transmission</label>
-            <input type="text" class="form-control" id="pot" placeholder="Parameter" name="pot">
+            <input type="number" min="0" max="1" step="any" required="true" class="form-control" id="pot" placeholder="Parameter" name="pot">
           </div>
         </div>
         <input type="hidden" name="kind_of_material" value="transparent_simple_layer">
@@ -136,7 +136,7 @@
         <div class="menu">
           <div class="form-group">
             <label for="poa">Probability of absorption</label>
-            <input type="text" class="form-control" id="poa" placeholder="Parameter" name="poa">
+            <input type="text" required="true" class="form-control" id="poa" placeholder="Parameter" name="poa">
           </div>
         </div>
         <input type="hidden" name="kind_of_material" value="absorber_simple_layer">
@@ -146,7 +146,7 @@
         <div class="menu">
           <div class="form-group">
             <label for="poa">Probability of absorption</label>
-            <input type="text" class="form-control" id="poa" placeholder="Parameter" name="poa">
+            <input type="number" min="0" max="1" step="any" required="true" class="form-control" id="poa" placeholder="Parameter" name="poa">
           </div>
         </div>
         <input type="hidden" name="kind_of_material" value="absorber_lambertian_layer">
@@ -156,11 +156,11 @@
         <div class="menu">
           <div class="form-group">
             <label for="poa">Probability of absorption</label>
-            <input type="text" class="form-control" id="poa" placeholder="Parameter" name="poa">
+            <input type="number" min="0" max="1" step="any" required="true" class="form-control" id="poa" placeholder="Parameter" name="poa">
             <label for="b_constant">b constant</label>
-            <input type="text" class="form-control" id="b_constant" placeholder="Parameter" name="b_constant">
+            <input type="number" step="any" required="true" class="form-control" id="b_constant" placeholder="Parameter" name="b_constant">
             <label for="c_constant">c constant</label>
-            <input type="text" class="form-control" id="c_constant" placeholder="Parameter" name="c_constant">
+            <input type="number" step="any" required="true" class="form-control" id="c_constant" placeholder="Parameter" name="c_constant">
           </div>
         </div>
         <input type="hidden" name="kind_of_material" value="absorber_TW_model_layer">
@@ -170,7 +170,7 @@
         <div class="menu">
           <div class="form-group">
             <label for="por">Probability of reflection</label>
-            <input type="text" class="form-control" id="por" placeholder="Parameter" name="por">
+            <input type="number" min="0" max="1" step="any" required="true" class="form-control" id="por" placeholder="Parameter" name="por">
             <label for="sigma_1">sigma_1 [mrad], empty if not sigma_1 distribution</label>
             <input type="text" class="form-control" id="sigma_1" placeholder="Parameter" name="sigma_1">
             <label for="sigma_2">sigma_2 [mrad], empty if not sigma_2 distribution</label>
@@ -186,7 +186,7 @@
         <div class="menu">
           <div class="form-group">
             <label for="por">Probability of reflection</label>
-            <input type="text" class="form-control" id="por" placeholder="Parameter" name="por">
+            <input type="number" min="0" max="1" step="any" required="true" class="form-control" id="por" placeholder="Parameter" name="por">
           </div>
         </div>
         <input type="hidden" name="kind_of_material" value="reflector_lambertian_layer">
@@ -196,13 +196,13 @@
         <div class="menu">
           <div class="form-group">
             <label for="ior_file">Text file with refractive index data:</label>
-            <input type="file" class="form-control-file" id="ior_file" name="ior_file">
+            <input type="file" required="true" class="form-control-file" id="ior_file" name="ior_file">
             <label for="sigma_1">sigma_1 [mrad], empty if not sigma_1 distribution</label>
-            <input type="text" class="form-control" id="sigma_1" placeholder="Parameter" name="sigma_1">
+            <input type="number" step="any" class="form-control" id="sigma_1" placeholder="Parameter" name="sigma_1">
             <label for="sigma_2">sigma_2 [mrad], empty if not sigma_2 distribution</label>
-            <input type="text" class="form-control" id="sigma_2" placeholder="Parameter" name="sigma_2">
+            <input type="number" step="any" class="form-control" id="sigma_2" placeholder="Parameter" name="sigma_2">
             <label for="k">weight for sigma_1 distribution, empty if not sigma_2 distribution</label>
-            <input type="text" class="form-control" id="k" placeholder="Parameter" name="k">
+            <input type="number" step="any" class="form-control" id="k" placeholder="Parameter" name="k">
           </div>
         </div>
         <input type="hidden" name="kind_of_material" value="metallic_specular_layer">
@@ -222,7 +222,7 @@
         <div class="menu">
           <div class="form-group">
             <label for="coating_file">Coating transparent file</label>
-            <input type="file" class="form-control-file" id="coating_file" name="coating_file">
+            <input type="file" required="true" class="form-control-file" id="coating_file" name="coating_file">
           </div>
         </div>
         <input type="hidden" name="kind_of_material" value="polarized_coating_transparent_layer">
@@ -232,7 +232,7 @@
         <div class="menu">
           <div class="form-group">
             <label for="coating_file">Coating absorber file</label>
-            <input type="file" class="form-control-file" id="coating_file" name="coating_file">
+            <input type="file" required="true" class="form-control-file" id="coating_file" name="coating_file">
           </div>
         </div>
         <input type="hidden" name="kind_of_material" value="polarized_coating_absorber_layer">
@@ -242,9 +242,9 @@
         <div class="menu">
           <div class="form-group">
             <label for="layer_front">Front_layer_name.rtmaterial file</label>
-            <input type="file" class="form-control-file" id="file_front" name="file_front">
+            <input type="file" required="true" class="form-control-file" id="file_front" name="file_front">
             <label for="layer_back">Back_layer_name.rtmaterial file</label>
-            <input type="file" class="form-control-file" id="file_back" name="file_back">
+            <input type="file" required="true" class="form-control-file" id="file_back" name="file_back">
           </div>
         </div>
         <input type="hidden" name="kind_of_material" value="two_layers_material">
@@ -254,7 +254,7 @@
         <div class="menu">
           <div class="form-group">
             <label for="por">Probability of reflection</label>
-            <input type="text" class="form-control" id="por" placeholder="Parameter" name="por">
+            <input type="number" min="0" max="1" step="any" required="true" class="form-control" id="por" placeholder="Parameter" name="por">
           </div>
         </div>
         <input type="hidden" name="kind_of_material" value="simple_symmetric_surface">
@@ -264,7 +264,7 @@
         <div class="menu">
           <div class="form-group">
             <label for="por">Probability of absortion</label>
-            <input type="text" class="form-control" id="poa" placeholder="Parameter" name="poa">
+            <input type="number" min="0" max="1" step="any" required="true" class="form-control" id="poa" placeholder="Parameter" name="poa">
           </div>
         </div>
         <input type="hidden" name="kind_of_material" value="simple_absorber_surface">
