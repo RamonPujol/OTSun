@@ -26,11 +26,11 @@
 
 <script type="application/javascript">
 
-    const choice_submit = `
+    var choice_submit = `
     <div class="menu"><button type="submit" class="btn btn-primary">Submit</button></div>
     `;
 
-    const choice1 = `
+    var choice1 = `
           <div class="menu">
           <div class="form-group">
             <label for="name">Identifier of material to create</label>
@@ -47,7 +47,7 @@
           </div>
     `;
 
-    const choice_volume = `
+    var choice_volume = `
           <div class="menu">
           <div class="form-group">
                <label for="choice_volume">Kind of volume material</label><br>
@@ -61,7 +61,7 @@
           </div>
     `;
 
-    const choice_constant_ior = `
+    var choice_constant_ior = `
         <div class="menu">
           <div class="form-group">
             <label for="ior">Index of refraction</label>
@@ -73,7 +73,7 @@
         <input type="hidden" name="kind_of_material" value="constant_ior">
      `+choice_submit;
 
-    const choice_variable_ior = `
+    var choice_variable_ior = `
     <div class="menu">
         <div class="form-group">
             <label for="ior_file">Text file with refractive index data:</label>
@@ -83,7 +83,7 @@
         <input type="hidden" required="true" name="kind_of_material" value="variable_ior">
      `+choice_submit;
 
-    const choice_PV_volume = `
+    var choice_PV_volume = `
     <div class="menu">
         <div class="form-group">
             <label for="PV_file">Text file with PV data:</label>
@@ -93,7 +93,7 @@
         <input type="hidden" name="kind_of_material" value="PV_volume">
      `+choice_submit;
 
-    const choice_surface = `
+    var choice_surface = `
           <div class="menu">
           <div class="form-group">
                <label for="choice_surface">Kind of surface</label><br>
@@ -118,11 +118,11 @@
           </div>
      `;
 
-    const choice_opaque_simple_layer = `
+    var choice_opaque_simple_layer = `
         <input type="hidden" name="kind_of_material" value="opaque_simple_layer">
      `+choice_submit;
 
-	 const choice_transparent_simple_layer = `
+	 var choice_transparent_simple_layer = `
         <div class="menu">
           <div class="form-group">
             <label for="pot">Probability of transmission</label>
@@ -132,7 +132,7 @@
         <input type="hidden" name="kind_of_material" value="transparent_simple_layer">
      `+choice_submit;
 
-	 const choice_absorber_simple_layer = `
+	 var choice_absorber_simple_layer = `
         <div class="menu">
           <div class="form-group">
             <label for="poa">Probability of absorption</label>
@@ -142,7 +142,7 @@
         <input type="hidden" name="kind_of_material" value="absorber_simple_layer">
      `+choice_submit;
 
-	 const choice_absorber_lambertian_layer = `
+	 var choice_absorber_lambertian_layer = `
         <div class="menu">
           <div class="form-group">
             <label for="poa">Probability of absorption</label>
@@ -152,7 +152,7 @@
         <input type="hidden" name="kind_of_material" value="absorber_lambertian_layer">
      `+choice_submit;
 
-	 const choice_absorber_TW_model_layer = `
+	 var choice_absorber_TW_model_layer = `
         <div class="menu">
           <div class="form-group">
             <label for="poa">Probability of absorption</label>
@@ -166,7 +166,7 @@
         <input type="hidden" name="kind_of_material" value="absorber_TW_model_layer">
      `+choice_submit;
 
-	 const choice_reflector_specular_layer = `
+	 var choice_reflector_specular_layer = `
         <div class="menu">
           <div class="form-group">
             <label for="por">Probability of reflection</label>
@@ -182,7 +182,7 @@
         <input type="hidden" name="kind_of_material" value="reflector_specular_layer">
      `+choice_submit;
 
-	 const choice_reflector_lambertian_layer = `
+	 var choice_reflector_lambertian_layer = `
         <div class="menu">
           <div class="form-group">
             <label for="por">Probability of reflection</label>
@@ -191,8 +191,8 @@
         </div>
         <input type="hidden" name="kind_of_material" value="reflector_lambertian_layer">
      `+choice_submit;
-	 
-	 const choice_metallic_specular_layer = `
+
+	 var choice_metallic_specular_layer = `
         <div class="menu">
           <div class="form-group">
             <label for="ior_file">Text file with refractive index data:</label>
@@ -208,7 +208,7 @@
         <input type="hidden" name="kind_of_material" value="metallic_specular_layer">
      `+choice_submit;
 
-	 const choice_polarized_coating_reflector_layer = `
+	 var choice_polarized_coating_reflector_layer = `
         <div class="menu">
           <div class="form-group">
             <label for="coating_file">Coating reflector file</label>
@@ -218,7 +218,7 @@
         <input type="hidden" name="kind_of_material" value="polarized_coating_reflector_layer">
      `+choice_submit;
 
-	 const choice_polarized_coating_transparent_layer = `
+	 var choice_polarized_coating_transparent_layer = `
         <div class="menu">
           <div class="form-group">
             <label for="coating_file">Coating transparent file</label>
@@ -228,7 +228,7 @@
         <input type="hidden" name="kind_of_material" value="polarized_coating_transparent_layer">
      `+choice_submit;
 
-	 const choice_polarized_coating_absorber_layer = `
+	 var choice_polarized_coating_absorber_layer = `
         <div class="menu">
           <div class="form-group">
             <label for="coating_file">Coating absorber file</label>
@@ -238,7 +238,7 @@
         <input type="hidden" name="kind_of_material" value="polarized_coating_absorber_layer">
      `+choice_submit;
 
-	 const choice_two_layers_material = `
+	 var choice_two_layers_material = `
         <div class="menu">
           <div class="form-group">
             <label for="layer_front">Front_layer_name.rtmaterial file</label>
@@ -249,8 +249,8 @@
         </div>
         <input type="hidden" name="kind_of_material" value="two_layers_material">
      `+choice_submit;
-	 
-	 const choice_simple_symmetric_surface = `
+
+	 var choice_simple_symmetric_surface = `
         <div class="menu">
           <div class="form-group">
             <label for="por">Probability of reflection</label>
@@ -260,7 +260,7 @@
         <input type="hidden" name="kind_of_material" value="simple_symmetric_surface">
      `+choice_submit;
 
-    const choice_simple_absorber_surface = `
+    var choice_simple_absorber_surface = `
         <div class="menu">
           <div class="form-group">
             <label for="por">Probability of absortion</label>
