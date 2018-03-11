@@ -271,8 +271,8 @@
      `+choice_submit;
 
     $(document).ready(function(){
-        $("#menus").html(choice1);
-        $("#menus").on("change","select", function(){
+        $("#menus").html(choice1)
+        .on("change","select", function(){
             let selectedValue = $(this).val();
             // console.log($(this));
             $(this).closest(".menu").nextAll().remove();
