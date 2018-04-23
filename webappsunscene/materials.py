@@ -35,6 +35,22 @@ def create_material(data, files):
         raytrace.create_wavelength_volume_material(data['name'], files['ior_file'])
     elif kind_of_material == 'PV_volume':
         raytrace.create_PV_material(data['name'], files['PV_file'])
+    elif kind_of_material == 'polarized_thin_film':
+        if data['front_vacuum']:
+            if data['back_vacuum']:
+                raytrace.create_polarized_thin_film(data['name'], files['thin_film_file'],
+                                                    "Vacuum", "Vacuum")
+            else:
+                raytrace.create_polarized_thin_film(data['name'], files['thin_film_file'],
+                                                    "Vacuum", files['back_file'])
+        else:
+            if data['back_vacuum']:
+                raytrace.create_polarized_thin_film(data['name'], files['thin_film_file'],
+                                                    files['front_file'], "Vacuum")
+            else:
+                raytrace.create_polarized_thin_film(data['name'], files['thin_film_file'],
+                                                    files['front_file'], files['back_file'])
+
     elif kind_of_material == 'opaque_simple_layer':
         raytrace.create_opaque_simple_layer(data['name'])
     elif kind_of_material == 'transparent_simple_layer':
@@ -62,6 +78,8 @@ def create_material(data, files):
                                                 None if data['sigma_1'] == '' else float(data['sigma_1']),
                                                 None if data['sigma_2'] == '' else float(data['sigma_2']),
                                                 None if data['k'] == '' else float(data['k']))
+    elif kind_of_material == 'metallic_lambertian_layer':
+        raytrace.create_metallic_lambertian_layer(data['name'], files['ior_file'])
     elif kind_of_material == 'polarized_coating_reflector_layer':
         raytrace.create_polarized_coating_reflector_layer(data['name'], files['coating_file'])
     elif kind_of_material == 'polarized_coating_transparent_layer':

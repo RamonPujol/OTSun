@@ -56,6 +56,7 @@
                   <option value="choice_constant_ior">Constant refractive index</option>
                   <option value="choice_variable_ior">Variable refractive index</option>
                   <option value="choice_PV_volume">PV material</option>
+                  <option value="choice_polarized_thin_film">Thin film material</option>
               </select>
           </div>
           </div>
@@ -93,6 +94,24 @@
         <input type="hidden" name="kind_of_material" value="PV_volume">
      `+choice_submit;
 
+    var choice_polarized_thin_film = `
+    <div class="menu">
+        <div class="form-group">
+            <label for="thin_film_file">Text file with thin film data:</label>
+            <input type="file" required="true" class="form-control-file" id="thin_film_file" name="thin_film_file">
+            <label for="front_vacuum">If front material is vacuum write Vacuum:</label>
+            <input type="text" class="form-control" id="front_vacuum" name="front_vacuum">
+            <label for="front_file">If front material is Volume load the text file with refractive index data:</label>
+            <input type="file" class="form-control-file" id="front_file" name="front_file">
+            <label for="back_vacuum">If back material is vacuum write Vacuum:</label>
+            <input type="text" class="form-control" id="back_vacuum" name="back_vacuum">
+            <label for="back_file">If back material is Volume load the text file with refractive index data:</label>
+            <input type="file" class="form-control-file" id="back_file" name="back_file">
+        </div>
+    </div>
+        <input type="hidden" name="kind_of_material" value="polarized_thin_film">
+     `+choice_submit;
+
     var choice_surface = `
           <div class="menu">
           <div class="form-group">
@@ -108,7 +127,8 @@
                   <option value="choice_polarized_coating_absorber_layer">Absorber polarized coating layer</option>
                   <option value="choice_reflector_specular_layer">Reflector specular layer</option>
                   <option value="choice_reflector_lambertian_layer">Reflector lambertian layer</option>
-                  <option value="choice_metallic_specular_layer">Reflector metallic layer</option>
+                  <option value="choice_metallic_specular_layer">Reflector specular metallic layer</option>
+                  <option value="choice_metallic_lambertian_layer">Reflector lambertian metallic layer</option>
                   <option value="choice_polarized_coating_reflector_layer">Reflector polarized coating layer</option>
                   <option value="choice_two_layers_material">Create material from two layers</option>
                   <option value="choice_simple_symmetric_surface">Simple symmetric surface</option>
@@ -172,11 +192,11 @@
             <label for="por">Probability of reflection</label>
             <input type="number" min="0" max="1" step="any" required="true" class="form-control" id="por" placeholder="Parameter" name="por">
             <label for="sigma_1">sigma_1 [mrad], empty if not sigma_1 distribution</label>
-            <input type="text" class="form-control" id="sigma_1" placeholder="Parameter" name="sigma_1">
+            <input type="number" class="form-control" id="sigma_1" placeholder="Parameter" name="sigma_1">
             <label for="sigma_2">sigma_2 [mrad], empty if not sigma_2 distribution</label>
-            <input type="text" class="form-control" id="sigma_2" placeholder="Parameter" name="sigma_2">
+            <input type="number" class="form-control" id="sigma_2" placeholder="Parameter" name="sigma_2">
             <label for="k">weight for sigma_1 distribution, empty if not sigma_2 distribution</label>
-            <input type="text" class="form-control" id="k" placeholder="Parameter" name="k">
+            <input type="number" class="form-control" id="k" placeholder="Parameter" name="k">
           </div>
         </div>
         <input type="hidden" name="kind_of_material" value="reflector_specular_layer">
@@ -206,6 +226,16 @@
           </div>
         </div>
         <input type="hidden" name="kind_of_material" value="metallic_specular_layer">
+     `+choice_submit;
+
+	 var choice_metallic_lambertian_layer = `
+        <div class="menu">
+          <div class="form-group">
+            <label for="ior_file">Text file with refractive index data:</label>
+            <input type="file" required="true" class="form-control-file" id="ior_file" name="ior_file">
+          </div>
+        </div>
+        <input type="hidden" name="kind_of_material" value="metallic_lambertian_layer">
      `+choice_submit;
 
 	 var choice_polarized_coating_reflector_layer = `

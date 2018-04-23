@@ -35,13 +35,14 @@
                 <div class="col">
                     <input type="text" class="form-control" placeholder="Step" id="wavelength_step" name="wavelength_step">
                 </div>
+            <small class="form-text text-muted">Leave Step empty if Initial = Final.</small>
             </div>
         </div>
 
 
 
         <div class="form-group">
-            <label for="numrays">Number of rays (for each frequency)</label>
+            <label for="numrays">Number of rays (for each wavelength)</label>
             <div class="form-row" id="numrays">
                 <div class="col">
                     <input type="text" class="form-control" placeholder="Value" id="numrays" name="numrays">
@@ -68,6 +69,16 @@
                 </div>
             </div>
         <small class="form-text text-muted">Leave it empty if there are no absorber thermal materials.</small>
+        </div>
+
+        <div class="form-group">
+            <label for="CSR">Ray distribution from the source: None or Buie model (CSR value) </label>
+            <div class="form-row" id="CSR">
+                <div class="col">
+                    <input type="text" class="form-control" placeholder="CSR value" id="CSR" name="CSR">
+                </div>
+            </div>
+        <small class="form-text text-muted">Leave it empty if there are no ray distribution.</small>
         </div>
 
         <button type="submit" class="btn btn-primary">Submit</button>
