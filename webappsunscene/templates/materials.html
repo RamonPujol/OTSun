@@ -67,8 +67,8 @@
           <div class="form-group">
             <label for="ior">Index of refraction</label>
             <input type="number" step="any" required="true" class="form-control" id="ior" placeholder="Parameter" name="ior">
-            <label for="ex_co">Extinction coefficient</label>
-            <input type="number" step="any" required="true" class="form-control" id="ex_co" placeholder="Parameter" name="ex_co">
+            <label for="at_co">Attenuation coefficient [mm-1]</label>
+            <input type="number" step="any" required="true" class="form-control" id="at_co" placeholder="Parameter" name="at_co">
           </div>
         </div>
         <input type="hidden" name="kind_of_material" value="constant_ior">
@@ -192,11 +192,11 @@
             <label for="por">Probability of reflection</label>
             <input type="number" min="0" max="1" step="any" required="true" class="form-control" id="por" placeholder="Parameter" name="por">
             <label for="sigma_1">sigma_1 [mrad], empty if not sigma_1 distribution</label>
-            <input type="number" class="form-control" id="sigma_1" placeholder="Parameter" name="sigma_1">
+            <input type="number" min="0" max="200" step="any" class="form-control" id="sigma_1" placeholder="Parameter" name="sigma_1">
             <label for="sigma_2">sigma_2 [mrad], empty if not sigma_2 distribution</label>
-            <input type="number" class="form-control" id="sigma_2" placeholder="Parameter" name="sigma_2">
+            <input type="number" min="0" max="200" step="any" class="form-control" id="sigma_2" placeholder="Parameter" name="sigma_2">
             <label for="k">weight for sigma_1 distribution, empty if not sigma_2 distribution</label>
-            <input type="number" class="form-control" id="k" placeholder="Parameter" name="k">
+            <input type="number" min="0" max="1" step="any"class="form-control" id="k" placeholder="Parameter" name="k">
           </div>
         </div>
         <input type="hidden" name="kind_of_material" value="reflector_specular_layer">
@@ -218,11 +218,11 @@
             <label for="ior_file">Text file with refractive index data:</label>
             <input type="file" required="true" class="form-control-file" id="ior_file" name="ior_file">
             <label for="sigma_1">sigma_1 [mrad], empty if not sigma_1 distribution</label>
-            <input type="number" step="any" class="form-control" id="sigma_1" placeholder="Parameter" name="sigma_1">
+            <input type="number" min="0" max="200" step="any" class="form-control" id="sigma_1" placeholder="Parameter" name="sigma_1">
             <label for="sigma_2">sigma_2 [mrad], empty if not sigma_2 distribution</label>
-            <input type="number" step="any" class="form-control" id="sigma_2" placeholder="Parameter" name="sigma_2">
+            <input type="number" min="0" max="200" step="any" class="form-control" id="sigma_2" placeholder="Parameter" name="sigma_2">
             <label for="k">weight for sigma_1 distribution, empty if not sigma_2 distribution</label>
-            <input type="number" step="any" class="form-control" id="k" placeholder="Parameter" name="k">
+            <input type="number" min="0" max="1" step="any"class="form-control" id="k" placeholder="Parameter" name="k">
           </div>
         </div>
         <input type="hidden" name="kind_of_material" value="metallic_specular_layer">

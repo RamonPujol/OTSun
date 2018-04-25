@@ -30,7 +30,7 @@ def create_material(data, files):
     if kind_of_material == 'constant_ior':
         raytrace.create_simple_volume_material(data['name'],
                                                float(data['ior']),
-                                               None if data['ex_co'] == '' else float(data['ex_co']))
+                                               None if data['at_co'] == '' else float(data['at_co']))
     elif kind_of_material == 'variable_ior':
         raytrace.create_wavelength_volume_material(data['name'], files['ior_file'])
     elif kind_of_material == 'PV_volume':

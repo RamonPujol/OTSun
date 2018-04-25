@@ -30,22 +30,37 @@ def experiment(data, root_folder):
 
     show_in_doc = None
     polarization_vector = None
-    phi_ini = float(data['phi_ini']) + 0.000001
-    phi_end = float(data['phi_end']) + 0.000001
-    phi_step = float(data['phi_step'])
-    theta_ini = float(data['theta_ini']) + 0.000001
-    theta_end = float(data['theta_end']) + 0.000001
-    theta_step = float(data['theta_step'])
+    phi_ini = float(data['phi_ini']) + 1.E-9
+    phi_end = float(data['phi_end']) + 1.E-4
+    if data['phi_step'] == "" or float(data['phi_step'])==0:
+        phi_step = 1.0
+    else:
+        phi_step = float(data['phi_step'])
+
+    theta_ini = float(data['theta_ini']) + 1.E-9
+    theta_end = float(data['theta_end']) + 1.E-4
+    if data['theta_step'] == "" or float(data['theta_step']==0):
+        theta_step = 1.0
+    else:
+        theta_step = float(data['theta_step'])
 
     if data['aperture_pv'] == "":
-        aperture_pv = 0
+        aperture_collector_PV = 0
     else:
-        aperture_pv = float(data['aperture_pv'])
+        aperture_collector_PV = float(data['aperture_pv'])
 
     if data['aperture_th'] == "":
-        aperture_th = 0
+        aperture_collector_Th= 0
     else:
-        aperture_th = float(data['aperture_th'])
+        aperture_collector_Th = float(data['aperture_th'])
+
+    # for direction of the source two options: Buie model or main_direction
+    if data['CSR'] == "":
+        direction_distribution = None
+    else:
+        direction_distribution = float(data['CSR'])  # default option main_direction
+        Buie_model = raytrace.BuieDistribution(CSR)
+        direction_distribution = Buie_model
 
     light_spectrum = raytrace.create_CDF_from_PDF(data_file_spectrum)
 
@@ -80,32 +95,29 @@ def experiment(data, root_folder):
                                        polarization_vector)
             exp = raytrace.Experiment(current_scene, l_s, number_of_rays, show_in_doc)
             exp.run()
-            if aperture_th != 0.0:
-                efficiency_from_source_th = (exp.captured_energy_Th /aperture_th) / (
+            if aperture_collector_Th != 0.0:
+                efficiency_from_source_th = (exp.captured_energy_Th /aperture_collector_Th) / (
                         exp.number_of_rays/exp.light_source.emitting_region.aperture)
             else:
                 efficiency_from_source_th = 0.0
-            if aperture_pv != 0.0:
-                efficiency_from_source_pv = (exp.captured_energy_PV /aperture_pv) / (
+            if aperture_collector_PV != 0.0:
+                efficiency_from_source_pv = (exp.captured_energy_PV /aperture_collector_PV) / (
                         exp.number_of_rays/exp.light_source.emitting_region.aperture)
             else:
                 efficiency_from_source_pv = 0.0
-            # print ("%.3f %.3f %.6f %.6f %s" %
-            #   (ph, th, efficiency_from_source_th, efficiency_from_source_pv, t1-t0)+ '\n')
-            # outfile_effciency_results.write("%.3f %.3f %.6f %.6f" %
-            #   (ph, th, efficiency_from_source_th, efficiency_from_source_pv)+ '\n')
             results.append((ph, th, efficiency_from_source_th, efficiency_from_source_pv))
             statuslogger.increment()
 
     power_emitted_by_m2 = raytrace.integral_from_data_file(data_file_spectrum)
 
-    with open(os.path.join(destfolder, 'efficiency_results-a.txt'), 'w') as outfile_efficiency_results:
+    with open(os.path.join(destfolder, 'efficiency_results.txt'), 'w') as outfile_efficiency_results:
         outfile_efficiency_results.write(
-            "%s %s" % (aperture_th * 0.001 * 0.001, "# Collector Th aperture in m2") + '\n')
+            "%s %s" % (aperture_collector_Th * 0.001 * 0.001, "# Collector Th aperture in m2") + '\n')
         outfile_efficiency_results.write(
-            "%s %s" % (aperture_pv * 0.001 * 0.001, "# Collector PV aperture in m2") + '\n')
+            "%s %s" % (aperture_collector_PV * 0.001 * 0.001, "# Collector PV aperture in m2") + '\n')
         outfile_efficiency_results.write("%s %s" % (power_emitted_by_m2, "# Source power emitted by m2") + '\n')
-        outfile_efficiency_results.write("%s %s %s %s" % (
-            "# phi;   ", "theta;   ", "efficiency_from_source_Th;   ", "efficiency_from_source_PV") + '\n')
+        outfile_efficiency_results.write("%s %s" % (number_of_rays, "# Rays emitted")+ '\n')
+        outfile_efficiency_results.write("%s" % (
+            "#phi theta efficiency_from_source_Th efficiency_from_source_PV") + '\n')
         for result in results:
             outfile_efficiency_results.write("%.3f %.3f %.6f %.6f\n" % result)
