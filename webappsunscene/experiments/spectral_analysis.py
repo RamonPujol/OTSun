@@ -1,3 +1,4 @@
+import logging
 import sys
 import os
 sys.path.append("/usr/lib/freecad")
@@ -7,7 +8,6 @@ import raytrace
 import numpy as np
 import multiprocessing
 from webappsunscene.utils.statuslogger import StatusLogger
-import logging
 
 logger = logging.getLogger(__name__)
 
