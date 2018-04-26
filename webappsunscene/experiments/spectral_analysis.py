@@ -53,7 +53,7 @@ def experiment(data, root_folder):
     if data['CSR'] == "":
         direction_distribution = None
     else:
-        direction_distribution = float(data['CSR'])  # default option main_direction
+        CSR = float(data['CSR'])  # default option main_direction
         Buie_model = raytrace.BuieDistribution(CSR)
         direction_distribution = Buie_model
 
