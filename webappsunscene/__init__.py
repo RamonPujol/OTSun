@@ -15,7 +15,7 @@ from materials import create_material
 import logging
 logger = logging.getLogger(__name__)
 
-app = Flask(__name__, static_url_path='/patata')
+app = Flask(__name__, static_url_path='/static_file')
 
 UPLOAD_FOLDER = '/tmp/WebAppSunScene'
 if not os.path.exists(UPLOAD_FOLDER):
@@ -210,6 +210,10 @@ def send_file(identifier=None):
         return "No process job specified"
     return send_from_directory(root_folder(identifier), 'output.zip')
 
+
+@app.route('/static_file/<path:filename>')
+def send_static_file(filename):
+    return send_from_directory(app.static_folder, filename)
 
 @app.route('/material', methods=['GET','POST'])
 def material():
