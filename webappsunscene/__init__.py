@@ -15,7 +15,7 @@ from materials import create_material
 import logging
 logger = logging.getLogger(__name__)
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/patata')
 
 UPLOAD_FOLDER = '/tmp/WebAppSunScene'
 if not os.path.exists(UPLOAD_FOLDER):
@@ -221,6 +221,7 @@ def material():
         files = request.files
         filename = create_material(data, files)
         return flask.send_file(filename,as_attachment=True)
+
 
 def run_offline(identifier):
     root1 = root_folder(identifier)
