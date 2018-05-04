@@ -1,5 +1,5 @@
 from __future__ import print_function
-from flask import Flask, request, redirect, render_template, send_from_directory
+from flask import Flask, request, redirect, render_template, send_from_directory, current_app
 import flask
 from uuid import uuid4
 import os
@@ -213,7 +213,8 @@ def send_file(identifier=None):
 
 @app.route('/static_file/<path:filename>')
 def send_static_file(filename):
-    return send_from_directory(app.static_folder, filename)
+    return current_app.send_static_file(filename)
+    #   send_from_directory(app.static_folder, filename)
 
 @app.route('/material', methods=['GET','POST'])
 def material():
