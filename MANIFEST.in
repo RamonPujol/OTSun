@@ -1,2 +1,3 @@
 recursive-include webappsunscene/templates *
 recursive-include webappsunscene/experiments/data *
+recursive-include webappsunscene/static *
