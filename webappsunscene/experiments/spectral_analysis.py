@@ -157,7 +157,7 @@ def experiment(data, root_folder):
     # ---
     # Output source spectrum for calculation and total energy emitted
     # ---
-    source_spectrum = raytrace.spectrum_to_constant_step(data_file_spectrum, wavelength_step, wavelength_ini, wavelength_end)
+    source_spectrum = raytrace.spectrum_to_constant_step(data_file_spectrum, 0.5, wavelength_ini, wavelength_end)
     energy_emitted = np.trapz(source_spectrum[:, 1], x=source_spectrum[:, 0])
     # --------- end
 
@@ -169,10 +169,9 @@ def experiment(data, root_folder):
         table_Th = raytrace.make_histogram_from_experiment_results(Th_wavelength, Th_energy, wavelength_step,
                                                                    aperture_collector_Th,
                                                                    exp.light_source.emitting_region.aperture)
-
-        table_Th = raytrace.twoD_array_to_constant_step(table_Th, wavelength_step, wavelength_ini, wavelength_end)
-        spectrum_by_table_Th = source_spectrum[:, 1] * table_Th[:, 1]
-        power_absorbed_from_source_Th = np.trapz(spectrum_by_table_Th, x=source_spectrum[:, 0])
+        table_Th_05 = raytrace.twoD_array_to_constant_step(table_Th, 0.5, wavelength_ini, wavelength_end)
+        spectrum_by_table_Th_05 = source_spectrum[:, 1] * table_Th_05[:, 1]
+        power_absorbed_from_source_Th = np.trapz(spectrum_by_table_Th_05, x=source_spectrum[:, 0])
         efficiency_from_source_Th = power_absorbed_from_source_Th / energy_emitted
 
         with open(os.path.join(destfolder, 'Th_spectral_efficiency.txt'), 'w') as outfile_Th_spectral:
@@ -187,10 +186,10 @@ def experiment(data, root_folder):
 
         with open(os.path.join(destfolder, 'Th_integral_spectrum.txt'), 'w') as outfile_Th_integral_spectrum:
             outfile_Th_integral_spectrum.write("%s\n" % (
-                "#power_absorbed_from_source_Th energy_emitted efficiency_from_source_Th"))
+                "#power_absorbed_from_source_Th irradiance_emitted(W/m2) efficiency_from_source_Th"))
             outfile_Th_integral_spectrum.write("%s %s %s\n" % (
                 power_absorbed_from_source_Th * aperture_collector_Th * 1E-6,
-                energy_emitted * exp.light_source.emitting_region.aperture * 1E-6,
+                energy_emitted,
                 efficiency_from_source_Th))
         # print power_absorbed_from_source_Th * aperture_collector_Th * 1E-6,
         # energy_emitted * exp.light_source.emitting_region.aperture * 1E-6, efficiency_from_source_Th
@@ -206,10 +205,9 @@ def experiment(data, root_folder):
         table_PV = raytrace.make_histogram_from_experiment_results(PV_wavelength, PV_energy, wavelength_step,
                                                                    aperture_collector_PV,
                                                                    exp.light_source.emitting_region.aperture)
-
-        table_PV = raytrace.twoD_array_to_constant_step(table_PV, wavelength_step, wavelength_ini, wavelength_end)
-        spectrum_by_table_PV = source_spectrum[:, 1] * table_PV[:, 1]
-        power_absorbed_from_source_PV = np.trapz(spectrum_by_table_PV, x=source_spectrum[:, 0])
+        table_PV_05 = raytrace.twoD_array_to_constant_step(table_PV, 0.5, wavelength_ini, wavelength_end)
+        spectrum_by_table_PV_05 = source_spectrum[:, 1] * table_PV_05[:, 1]
+        power_absorbed_from_source_PV = np.trapz(spectrum_by_table_PV_05, x=source_spectrum[:, 0])
         efficiency_from_source_PV = power_absorbed_from_source_PV / energy_emitted
 
         # iqe = internal_quantum_efficiency
@@ -222,13 +220,7 @@ def experiment(data, root_folder):
 
         with open(os.path.join(destfolder, 'PV_paths_values.txt'), 'w') as outfile_PV_paths_values:
             outfile_PV_paths_values.write("%s\n" % (
-                "#first_point_in_PV[3]"
-                "second_point_in_PV[3]"
-                "energy_ray_first_point"
-                "energy_ray_second_point"
-                "wavelength_ray(nm)"
-                "absortion_coefficient_alpha(mm-1)"
-                "incident_angle(deg.)"))
+                "#first_point_in_PV[3] second_point_in_PV[3] energy_ray_first_point energy_ray_second_point wavelength_ray(nm) absortion_coefficient_alpha(mm-1) incident_angle(deg.)"))
             np.savetxt(outfile_PV_paths_values, data_PV_values,
                        fmt=['%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f'])
 
