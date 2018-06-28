@@ -27,6 +27,10 @@ else:
         os.makedirs(UPLOAD_FOLDER)
 URL_ROOT = None
 
+calls_logger = logging.getLogger(__name__)
+calls_logger.setLevel(logging.INFO)
+calls_handler = logging.FileHandler(os.path.join(UPLOAD_FOLDER, '00webapp.log'))
+calls_logger.addHandler(calls_handler)
 
 # formatter = logging.Formatter(
 #     "[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s")
