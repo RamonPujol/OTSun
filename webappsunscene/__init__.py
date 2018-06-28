@@ -13,7 +13,6 @@ from werkzeug.utils import secure_filename
 from processing_unit import process_experiment, run_processor
 from materials import create_material
 import logging
-from logging.handlers import FileHandler
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__, static_url_path='/static_file')
@@ -157,6 +156,7 @@ def node(name, identifier=None):
         data = request.form.to_dict()
         if identifier is None:
             identifier = str(uuid4())
+            calls_logger.info("Process with id %s has email %s and ip %s", identifier, data['email'], request.remote_addr)
         file_ids = request.files
         for file_id in file_ids:
             the_file = request.files[file_id]
@@ -258,7 +258,7 @@ if __name__ == '__main__':
 
     calls_logger = logging.getLogger(__name__)
     calls_logger.setLevel(logging.INFO)
-    calls_handler = FileHandler(os.path.join(UPLOAD_FOLDER,'00webapp.log'))
+    calls_handler = logging.FileHandler(os.path.join(UPLOAD_FOLDER,'00webapp.log'))
     calls_logger.addHandler(calls_handler)
 
 
