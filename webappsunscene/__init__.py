@@ -13,6 +13,7 @@ from werkzeug.utils import secure_filename
 from processing_unit import process_experiment, run_processor
 from materials import create_material
 import logging
+from logging.handlers import FileHandler
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__, static_url_path='/static_file')
@@ -131,6 +132,7 @@ def process_processor(identifier):
 @app.route('/')
 def hello():
     logger.info("Processing root")
+    calls_logger.info("Calling root from %s", request.remote_addr)
     global URL_ROOT
     if URL_ROOT is None:
         URL_ROOT = request.url_root
@@ -140,6 +142,7 @@ def hello():
 @app.route('/node/<name>/<identifier>', methods=['GET', 'POST'])
 @app.route('/node/<name>', methods=['GET', 'POST'])
 def node(name, identifier=None):
+    calls_logger.info("Calling %s with id %s from %s", name, identifier ,request.remote_addr)
     if identifier:
         logger.info("Processing %s/%s", name, identifier)
     else:
@@ -175,6 +178,7 @@ def node(name, identifier=None):
 
 @app.route('/end/<identifier>')
 def end_process(identifier):
+    calls_logger.info("Calling %s with id %s from %s", 'end', identifier ,request.remote_addr)
     if identifier:
         logger.info("Processing end/%s", identifier)
     else:
@@ -189,6 +193,7 @@ def end_process(identifier):
 
 @app.route('/status/<identifier>')
 def status(identifier):
+    calls_logger.info("Calling %s with id %s from %s", 'status', identifier ,request.remote_addr)
     if identifier:
         logger.info("Processing status/%s", identifier)
     else:
@@ -202,6 +207,7 @@ def status(identifier):
 @app.route('/results/<identifier>', methods=['GET'])
 @app.route('/results/')
 def send_file(identifier=None):
+    calls_logger.info("Calling %s with id %s from %s", 'results', identifier ,request.remote_addr)
     if identifier:
         logger.info("Requesting results of %s", identifier)
     else:
@@ -249,6 +255,12 @@ if __name__ == '__main__':
     handler.setFormatter(formatter)
     logger.addHandler(handler)
     logger.setLevel(logging.DEBUG)
+
+    calls_logger = logging.getLogger(__name__)
+    calls_logger.setLevel(logging.INFO)
+    calls_handler = FileHandler(os.path.join(UPLOAD_FOLDER,'00webapp.log'))
+    calls_logger.addHandler(calls_handler)
+
 
     logger.debug("Starting")
     app.jinja_env.auto_reload = True
