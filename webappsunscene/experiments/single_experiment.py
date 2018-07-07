@@ -5,8 +5,8 @@ import os
 sys.path.append("/usr/lib/freecad")
 sys.path.append("/usr/lib/freecad/lib")
 import FreeCAD
-import raytrace
-import raytrace
+import otsun
+import otsun
 import numpy as np
 import time
 from shutil import copy
@@ -45,11 +45,11 @@ def compute(args):
                  ph, th, w, number_of_rays, aperture_collector)
 
     # prepare experiment
-    main_direction = raytrace.polar_to_cartesian(ph, th) * -1.0  # Sun direction vector
-    emitting_region = raytrace.SunWindow(current_scene, main_direction)
-    l_s = raytrace.LightSource(current_scene, emitting_region, w, 1.0, None)
+    main_direction = otsun.polar_to_cartesian(ph, th) * -1.0  # Sun direction vector
+    emitting_region = otsun.SunWindow(current_scene, main_direction)
+    l_s = otsun.LightSource(current_scene, emitting_region, w, 1.0, None)
     logger.debug("defining experiment")
-    exp = raytrace.Experiment(current_scene, l_s, number_of_rays, doc)
+    exp = otsun.Experiment(current_scene, l_s, number_of_rays, doc)
 
     # run experiment and compute output
     logger.debug("running experiment")
@@ -90,7 +90,7 @@ def experiment(data, root_folder):
             with z.open(matfile) as f:
                 try:
                     mat = dill.load(f)
-                    raytrace.Material.by_name[mat.name] = mat
+                    otsun.Material.by_name[mat.name] = mat
                 except:
                     pass
 
@@ -101,7 +101,7 @@ def experiment(data, root_folder):
 
 
     sel = doc.Objects
-    current_scene = raytrace.Scene(sel)
+    current_scene = otsun.Scene(sel)
 
     # list_pars = []
     # for ph in np.arange(phi1, phi2, phidelta):

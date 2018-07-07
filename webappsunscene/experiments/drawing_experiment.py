@@ -4,7 +4,7 @@ import os
 sys.path.append("/usr/lib/freecad")
 sys.path.append("/usr/lib/freecad/lib")
 import FreeCAD
-import raytrace
+import otsun
 import numpy as np
 import multiprocessing
 from webappsunscene.utils.statuslogger import StatusLogger
@@ -45,19 +45,19 @@ def experiment(data, root_folder):
         direction_distribution = None
     else:
         CSR = float(data['CSR'])  # default option main_direction
-        Buie_model = raytrace.BuieDistribution(CSR)
+        Buie_model = otsun.BuieDistribution(CSR)
         direction_distribution = Buie_model
 
     files_folder = os.path.join(root_folder, 'files')
     freecad_file = os.path.join(files_folder, data['freecad_file'])
     materials_file = os.path.join(files_folder, data['materials_file'])
 
-    raytrace.Material.load_from_zipfile(materials_file)
+    otsun.Material.load_from_zipfile(materials_file)
     FreeCAD.openDocument(freecad_file)
     doc = FreeCAD.ActiveDocument
 
     sel = doc.Objects
-    current_scene = raytrace.Scene(sel)
+    current_scene = otsun.Scene(sel)
 
     manager = multiprocessing.Manager()
     statuslogger = StatusLogger(manager, 0, root_folder)
@@ -82,11 +82,11 @@ def experiment(data, root_folder):
     show_in_doc = doc
     w = wavelength
     light_spectrum = w
-    main_direction = raytrace.polar_to_cartesian(phi, theta) * -1.0  # Sun direction vector
-    emitting_region = raytrace.SunWindow(current_scene, main_direction)
-    l_s = raytrace.LightSource(current_scene, emitting_region, light_spectrum, 1.0, direction_distribution,
+    main_direction = otsun.polar_to_cartesian(phi, theta) * -1.0  # Sun direction vector
+    emitting_region = otsun.SunWindow(current_scene, main_direction)
+    l_s = otsun.LightSource(current_scene, emitting_region, light_spectrum, 1.0, direction_distribution,
                                polarization_vector)
-    exp = raytrace.Experiment(current_scene, l_s, number_of_rays, show_in_doc)
+    exp = otsun.Experiment(current_scene, l_s, number_of_rays, show_in_doc)
     exp.run(show_in_doc)
     Th_energy.append(exp.Th_energy)
     Th_wavelength.append(exp.Th_wavelength)

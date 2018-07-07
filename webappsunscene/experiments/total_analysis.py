@@ -4,7 +4,7 @@ import os
 sys.path.append("/usr/lib/freecad")
 sys.path.append("/usr/lib/freecad/lib")
 import FreeCAD
-import raytrace
+import otsun
 import numpy as np
 import multiprocessing
 from webappsunscene.utils.statuslogger import StatusLogger
@@ -17,7 +17,7 @@ def experiment(data, root_folder):
     global current_scene
 
     CSR = 0.05
-    Buie_model = raytrace.BuieDistribution(CSR)
+    Buie_model = otsun.BuieDistribution(CSR)
     direction_distribution = Buie_model
 
     _ROOT = os.path.abspath(os.path.dirname(__file__))
@@ -59,22 +59,22 @@ def experiment(data, root_folder):
         direction_distribution = None
     else:
         direction_distribution = float(data['CSR'])  # default option main_direction
-        Buie_model = raytrace.BuieDistribution(CSR)
+        Buie_model = otsun.BuieDistribution(CSR)
         direction_distribution = Buie_model
 
-    light_spectrum = raytrace.create_CDF_from_PDF(data_file_spectrum)
+    light_spectrum = otsun.create_CDF_from_PDF(data_file_spectrum)
 
     number_of_rays = int(data['numrays'])
     files_folder = os.path.join(root_folder, 'files')
     freecad_file = os.path.join(files_folder, data['freecad_file'])
     materials_file = os.path.join(files_folder, data['materials_file'])
 
-    raytrace.Material.load_from_zipfile(materials_file)
+    otsun.Material.load_from_zipfile(materials_file)
     FreeCAD.openDocument(freecad_file)
     doc = FreeCAD.ActiveDocument
 
     sel = doc.Objects
-    current_scene = raytrace.Scene(sel)
+    current_scene = otsun.Scene(sel)
 
     manager = multiprocessing.Manager()
     statuslogger = StatusLogger(manager, 0, root_folder)
@@ -89,11 +89,11 @@ def experiment(data, root_folder):
     results = []
     for ph in np.arange(phi_ini, phi_end, phi_step):
         for th in np.arange(theta_ini, theta_end, theta_step):
-            main_direction = raytrace.polar_to_cartesian(ph, th) * -1.0  # Sun direction vector
-            emitting_region = raytrace.SunWindow(current_scene, main_direction)
-            l_s = raytrace.LightSource(current_scene, emitting_region, light_spectrum, 1.0, direction_distribution,
+            main_direction = otsun.polar_to_cartesian(ph, th) * -1.0  # Sun direction vector
+            emitting_region = otsun.SunWindow(current_scene, main_direction)
+            l_s = otsun.LightSource(current_scene, emitting_region, light_spectrum, 1.0, direction_distribution,
                                        polarization_vector)
-            exp = raytrace.Experiment(current_scene, l_s, number_of_rays, show_in_doc)
+            exp = otsun.Experiment(current_scene, l_s, number_of_rays, show_in_doc)
             exp.run()
             if aperture_collector_Th != 0.0:
                 efficiency_from_source_th = (exp.captured_energy_Th /aperture_collector_Th) / (
@@ -108,7 +108,7 @@ def experiment(data, root_folder):
             results.append((ph, th, efficiency_from_source_th, efficiency_from_source_pv))
             statuslogger.increment()
 
-    power_emitted_by_m2 = raytrace.integral_from_data_file(data_file_spectrum)
+    power_emitted_by_m2 = otsun.integral_from_data_file(data_file_spectrum)
 
     with open(os.path.join(destfolder, 'efficiency_results.txt'), 'w') as outfile_efficiency_results:
         outfile_efficiency_results.write(

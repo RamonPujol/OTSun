@@ -4,7 +4,7 @@ import os
 sys.path.append("/usr/lib/freecad")
 sys.path.append("/usr/lib/freecad/lib")
 import FreeCAD
-import raytrace
+import otsun
 import numpy as np
 import multiprocessing
 from webappsunscene.utils.statuslogger import StatusLogger
@@ -54,7 +54,7 @@ def experiment(data, root_folder):
         direction_distribution = None
     else:
         CSR = float(data['CSR'])  # default option main_direction
-        Buie_model = raytrace.BuieDistribution(CSR)
+        Buie_model = otsun.BuieDistribution(CSR)
         direction_distribution = Buie_model
 
     # for the internal quantum efficiency two options: constant value =< 1.0, or data file
@@ -67,12 +67,12 @@ def experiment(data, root_folder):
     freecad_file = os.path.join(files_folder, data['freecad_file'])
     materials_file = os.path.join(files_folder, data['materials_file'])
 
-    raytrace.Material.load_from_zipfile(materials_file)
+    otsun.Material.load_from_zipfile(materials_file)
     FreeCAD.openDocument(freecad_file)
     doc = FreeCAD.ActiveDocument
 
     sel = doc.Objects
-    current_scene = raytrace.Scene(sel)
+    current_scene = otsun.Scene(sel)
 
     manager = multiprocessing.Manager()
     statuslogger = StatusLogger(manager, 0, root_folder)
@@ -96,7 +96,7 @@ def experiment(data, root_folder):
 
     # objects for scene
     sel = doc.Objects
-    current_scene = raytrace.Scene(sel)
+    current_scene = otsun.Scene(sel)
 
     number_of_runs = 0
     for _ in np.arange(wavelength_ini, wavelength_end, wavelength_step):
@@ -105,11 +105,11 @@ def experiment(data, root_folder):
     statuslogger.total = number_of_runs
     for w in np.arange(wavelength_ini, wavelength_end, wavelength_step):
         light_spectrum = w
-        main_direction = raytrace.polar_to_cartesian(phi, theta) * -1.0  # Sun direction vector
-        emitting_region = raytrace.SunWindow(current_scene, main_direction)
-        l_s = raytrace.LightSource(current_scene, emitting_region, light_spectrum, 1.0, direction_distribution,
+        main_direction = otsun.polar_to_cartesian(phi, theta) * -1.0  # Sun direction vector
+        emitting_region = otsun.SunWindow(current_scene, main_direction)
+        l_s = otsun.LightSource(current_scene, emitting_region, light_spectrum, 1.0, direction_distribution,
                                    polarization_vector)
-        exp = raytrace.Experiment(current_scene, l_s, number_of_rays, show_in_doc)
+        exp = otsun.Experiment(current_scene, l_s, number_of_rays, show_in_doc)
         exp.run()
         # print ("%s" % (w) + '\n')
         Th_energy.append(exp.Th_energy)
@@ -157,7 +157,7 @@ def experiment(data, root_folder):
     # ---
     # Output source spectrum for calculation and total energy emitted
     # ---
-    source_spectrum = raytrace.spectrum_to_constant_step(data_file_spectrum, 0.5, wavelength_ini, wavelength_end)
+    source_spectrum = otsun.spectrum_to_constant_step(data_file_spectrum, 0.5, wavelength_ini, wavelength_end)
     energy_emitted = np.trapz(source_spectrum[:, 1], x=source_spectrum[:, 0])
     # --------- end
 
@@ -166,10 +166,10 @@ def experiment(data, root_folder):
     # ---
     if captured_energy_th > 1E-9:
         data_Th_points_absorber = np.array(np.concatenate(Th_points_absorber))
-        table_Th = raytrace.make_histogram_from_experiment_results(Th_wavelength, Th_energy, wavelength_step,
+        table_Th = otsun.make_histogram_from_experiment_results(Th_wavelength, Th_energy, wavelength_step,
                                                                    aperture_collector_Th,
                                                                    exp.light_source.emitting_region.aperture)
-        table_Th_05 = raytrace.twoD_array_to_constant_step(table_Th, 0.5, wavelength_ini, wavelength_end)
+        table_Th_05 = otsun.twoD_array_to_constant_step(table_Th, 0.5, wavelength_ini, wavelength_end)
         spectrum_by_table_Th_05 = source_spectrum[:, 1] * table_Th_05[:, 1]
         power_absorbed_from_source_Th = np.trapz(spectrum_by_table_Th_05, x=source_spectrum[:, 0])
         efficiency_from_source_Th = power_absorbed_from_source_Th / energy_emitted
@@ -202,17 +202,17 @@ def experiment(data, root_folder):
     # ---
     if captured_energy_pv > 1E-9:
         data_PV_values = np.array(np.concatenate(PV_values))
-        table_PV = raytrace.make_histogram_from_experiment_results(PV_wavelength, PV_energy, wavelength_step,
+        table_PV = otsun.make_histogram_from_experiment_results(PV_wavelength, PV_energy, wavelength_step,
                                                                    aperture_collector_PV,
                                                                    exp.light_source.emitting_region.aperture)
-        table_PV_05 = raytrace.twoD_array_to_constant_step(table_PV, 0.5, wavelength_ini, wavelength_end)
+        table_PV_05 = otsun.twoD_array_to_constant_step(table_PV, 0.5, wavelength_ini, wavelength_end)
         spectrum_by_table_PV_05 = source_spectrum[:, 1] * table_PV_05[:, 1]
         power_absorbed_from_source_PV = np.trapz(spectrum_by_table_PV_05, x=source_spectrum[:, 0])
         efficiency_from_source_PV = power_absorbed_from_source_PV / energy_emitted
 
         # iqe = internal_quantum_efficiency
-        # SR = raytrace.spectral_response(table_PV, iqe)
-        # ph_cu = raytrace.photo_current(SR, source_spectrum)
+        # SR = otsun.spectral_response(table_PV, iqe)
+        # ph_cu = otsun.photo_current(SR, source_spectrum)
 
         with open(os.path.join(destfolder, 'PV_spectral_efficiency.txt'), 'w') as outfile_PV_spectral:
             outfile_PV_spectral.write("%s\n" % ("#wavelength(nm) efficiency_PV_absorbed"))

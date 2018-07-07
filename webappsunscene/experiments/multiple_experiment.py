@@ -5,7 +5,7 @@ import os
 sys.path.append("/usr/lib/freecad")
 sys.path.append("/usr/lib/freecad/lib")
 import FreeCAD
-import raytrace
+import otsun
 import numpy as np
 import multiprocessing
 from webappsunscene.utils.statuslogger import StatusLogger
@@ -21,11 +21,11 @@ def compute(args):
                      ph, th, w, number_of_rays, aperture_collector)
 
         # prepare experiment
-        main_direction = raytrace.polar_to_cartesian(ph, th) * -1.0  # Sun direction vector
-        emitting_region = raytrace.SunWindow(current_scene, main_direction)
-        l_s = raytrace.LightSource(current_scene, emitting_region, w, 1.0, None)
+        main_direction = otsun.polar_to_cartesian(ph, th) * -1.0  # Sun direction vector
+        emitting_region = otsun.SunWindow(current_scene, main_direction)
+        l_s = otsun.LightSource(current_scene, emitting_region, w, 1.0, None)
         logger.debug("defining experiment")
-        exp = raytrace.Experiment(current_scene, l_s, number_of_rays)
+        exp = otsun.Experiment(current_scene, l_s, number_of_rays)
 
         # run experiment and compute output
         logger.debug("running experiment")
@@ -62,7 +62,7 @@ def experiment(data, root_folder):
     freecad_file = os.path.join(files_folder, data['freecad_file'])
     materials_file = os.path.join(files_folder, data['materials_file'])
 
-    raytrace.Material.load_from_zipfile(materials_file)
+    otsun.Material.load_from_zipfile(materials_file)
 
     logger.debug("in experiment2", locals())
 
@@ -71,7 +71,7 @@ def experiment(data, root_folder):
 
 
     sel = doc.Objects
-    current_scene = raytrace.Scene(sel)
+    current_scene = otsun.Scene(sel)
 
     manager = multiprocessing.Manager()
     statuslogger = StatusLogger(manager, 0, root_folder)
