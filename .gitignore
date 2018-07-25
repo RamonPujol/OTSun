@@ -16,3 +16,5 @@ dist
 webappSunScene.egg-info
 Vagrant_scripts
 WebAppSunScene.egg-info
+secret_settings.py
+scheme_calls.graphml

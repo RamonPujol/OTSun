@@ -13,10 +13,13 @@ from werkzeug.utils import secure_filename
 from processing_unit import process_experiment, run_processor
 from materials import create_material
 import logging
+import webappsunscene.default_settings
 
 app = Flask(__name__, static_url_path='/static_file')
+app.config.from_object(webappsunscene.default_settings)
+app.config.from_envvar("OTSUN_CONFIG_FILE", silent = True)
 
-UPLOAD_FOLDER = '/tmp/WebAppSunScene'
+UPLOAD_FOLDER = app.config['UPLOAD_FOLDER']
 if not os.path.exists(UPLOAD_FOLDER):
     app.logger.info('creating upload folder')
     os.makedirs(UPLOAD_FOLDER)
@@ -25,6 +28,12 @@ else:
         UPLOAD_FOLDER += str(uuid4())
         os.makedirs(UPLOAD_FOLDER)
 URL_ROOT = None
+
+MAIL_SENDER = app.config['MAIL_SENDER']
+MAIL_SERVER = app.config['MAIL_SERVER']
+MAIL_PASSWD = app.config['MAIL_PASSWD']
+MAIL_PORT = app.config['MAIL_PORT']
+
 
 # formatter = logging.Formatter(
 #     "[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s")
@@ -82,8 +91,8 @@ def save_file(the_file, identifier, filename):
 
 def send_mail(toaddr, identifier):
     app.logger.info("Sending mail for id %s", identifier)
-    fromaddr = "pysunscene@gmail.com"
-    frompasswd = "uibdmidfis"
+    fromaddr = MAIL_SENDER
+    frompasswd = MAIL_PASSWD
 
     msg = MIMEMultipart()
 
@@ -100,7 +109,7 @@ def send_mail(toaddr, identifier):
 
     msg.attach(MIMEText(body, 'html'))
 
-    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server = smtplib.SMTP(MAIL_SERVER, MAIL_PORT)
     server.starttls()
     server.login(fromaddr, frompasswd)
     text = msg.as_string()
