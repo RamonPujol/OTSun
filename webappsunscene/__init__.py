@@ -34,15 +34,6 @@ MAIL_SERVER = app.config['MAIL_SERVER']
 MAIL_PASSWD = app.config['MAIL_PASSWD']
 MAIL_PORT = app.config['MAIL_PORT']
 
-
-# formatter = logging.Formatter(
-#     "[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s")
-# handler = RotatingFileHandler(LOG_FILE, maxBytes=1000000, backupCount=5)
-# handler.setLevel(logging.INFO)
-# handler.setFormatter(formatter)
-# logging.addHandler(handler)
-
-
 def root_folder(identifier):
     folder = os.path.join(UPLOAD_FOLDER, identifier)
     if not os.path.exists(folder):
