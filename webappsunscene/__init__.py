@@ -138,8 +138,10 @@ def process_processor(identifier):
 
 @app.before_request
 def pre_prequest_logging():
-    app.logger.info("Calling url %s from ip %s",
-                    request.url, request.remote_addr)
+    app.logger.info("Got %s request of url %s from ip %s",
+                    request.method,
+                    request.url,
+                    request.remote_addr)
 
 @app.route('/')
 def hello():
