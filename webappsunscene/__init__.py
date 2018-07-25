@@ -13,24 +13,18 @@ from werkzeug.utils import secure_filename
 from processing_unit import process_experiment, run_processor
 from materials import create_material
 import logging
-logger = logging.getLogger(__name__)
 
 app = Flask(__name__, static_url_path='/static_file')
 
 UPLOAD_FOLDER = '/tmp/WebAppSunScene'
 if not os.path.exists(UPLOAD_FOLDER):
-    logger.info('creating upload folder')
+    app.logger.info('creating upload folder')
     os.makedirs(UPLOAD_FOLDER)
 else:
     if not os.access(UPLOAD_FOLDER, os.W_OK):
         UPLOAD_FOLDER += str(uuid4())
         os.makedirs(UPLOAD_FOLDER)
 URL_ROOT = None
-
-calls_logger = logging.getLogger(__name__)
-calls_logger.setLevel(logging.INFO)
-calls_handler = logging.FileHandler(os.path.join(UPLOAD_FOLDER, '00webapp.log'))
-calls_logger.addHandler(calls_handler)
 
 # formatter = logging.Formatter(
 #     "[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s")
@@ -54,7 +48,7 @@ def files_folder(identifier):
     return folder
 
 
-def json_file(identifier):
+def json_filename(identifier):
     return os.path.join(root_folder(identifier), 'data.json')
 
 
@@ -72,13 +66,13 @@ def load_json(filename):
 
 
 def load_data(identifier):
-    return load_json(json_file(identifier))
+    return load_json(json_filename(identifier))
 
 
 def save_data(data, identifier):
     saved_data = load_data(identifier)
     saved_data.update(data)
-    with open(json_file(identifier), 'w') as fp:
+    with open(json_filename(identifier), 'w') as fp:
         json.dump(saved_data, fp)
 
 
@@ -87,6 +81,7 @@ def save_file(the_file, identifier, filename):
 
 
 def send_mail(toaddr, identifier):
+    app.logger.info("Sending mail for id %s", identifier)
     fromaddr = "pysunscene@gmail.com"
     frompasswd = "uibdmidfis"
 
@@ -114,9 +109,10 @@ def send_mail(toaddr, identifier):
 
 
 def process_request(identifier, should_send_mail = True):
+    app.logger.info("Processing request for id %s", identifier)
     # Call the processing unit
     dirname = root_folder(identifier)
-    datafile = json_file(identifier)
+    datafile = json_filename(identifier)
     process_experiment(datafile, dirname)
     # Send mail with link
     data = load_data(identifier)
@@ -125,17 +121,19 @@ def process_request(identifier, should_send_mail = True):
 
 
 def process_processor(identifier):
+    app.logger.info("Processing processor for id %s", identifier)
     # Call the processing unit
     dirname = root_folder(identifier)
-    datafile = json_file(identifier)
+    datafile = json_filename(identifier)
     return run_processor(datafile, dirname)
 
-
+@app.before_request
+def pre_prequest_logging():
+    app.logger.info("Calling url %s from ip %s",
+                    request.url, request.remote_addr)
 
 @app.route('/')
 def hello():
-    logger.info("Processing root")
-    calls_logger.info("Calling root from %s", request.remote_addr)
     global URL_ROOT
     if URL_ROOT is None:
         URL_ROOT = request.url_root
@@ -145,11 +143,6 @@ def hello():
 @app.route('/node/<name>/<identifier>', methods=['GET', 'POST'])
 @app.route('/node/<name>', methods=['GET', 'POST'])
 def node(name, identifier=None):
-    calls_logger.info("Calling %s with id %s from %s", name, identifier ,request.remote_addr)
-    if identifier:
-        logger.info("Processing %s/%s", name, identifier)
-    else:
-        logger.info("Processing %s ", name)
     if request.method == 'GET':
         if identifier:
             data = load_data(identifier)
@@ -160,14 +153,13 @@ def node(name, identifier=None):
         data = request.form.to_dict()
         if identifier is None:
             identifier = str(uuid4())
-            calls_logger.info("Process with id %s has email %s and ip %s", identifier, data['email'], request.remote_addr)
         file_ids = request.files
         for file_id in file_ids:
             the_file = request.files[file_id]
             if the_file and the_file.filename != "":
                 filename = the_file.filename
                 filename = secure_filename(filename)
-                logger.debug("filename is %s", filename)
+                app.logger.debug("filename is %s", filename)
                 save_file(the_file, identifier, filename)
                 data[file_id] = filename
         save_data(data, identifier)
@@ -182,11 +174,6 @@ def node(name, identifier=None):
 
 @app.route('/end/<identifier>')
 def end_process(identifier):
-    calls_logger.info("Calling %s with id %s from %s", 'end', identifier ,request.remote_addr)
-    if identifier:
-        logger.info("Processing end/%s", identifier)
-    else:
-        logger.info("Processing end ")
     global URL_ROOT
     if URL_ROOT is None:
         URL_ROOT = request.url_root
@@ -197,11 +184,6 @@ def end_process(identifier):
 
 @app.route('/status/<identifier>')
 def status(identifier):
-    calls_logger.info("Calling %s with id %s from %s", 'status', identifier ,request.remote_addr)
-    if identifier:
-        logger.info("Processing status/%s", identifier)
-    else:
-        logger.info("Processing status ")
     data_status = load_json(status_file(identifier))
     if not data_status:
         return render_template("error.html", identifier=identifier)
@@ -211,11 +193,6 @@ def status(identifier):
 @app.route('/results/<identifier>', methods=['GET'])
 @app.route('/results/')
 def send_file(identifier=None):
-    calls_logger.info("Calling %s with id %s from %s", 'results', identifier ,request.remote_addr)
-    if identifier:
-        logger.info("Requesting results of %s", identifier)
-    else:
-        logger.info("Requesting results")
     if identifier is None:
         return "No process job specified"
     return send_from_directory(root_folder(identifier), 'output.zip')
@@ -232,7 +209,7 @@ def material():
         return render_template('materials.html')
     if request.method == 'POST':
         data = request.form.to_dict()
-        logger.info("creating material with data:", data)
+        app.logger.info("creating material with data: %s", data)
         files = request.files
         filename = create_material(data, files)
         return flask.send_file(filename,as_attachment=True)
@@ -250,23 +227,16 @@ def run_offline(identifier):
     shutil.copytree(os.path.join(root1,'files'),os.path.join(root2,'files'))
     global URL_ROOT
     process_request(identifier2, should_send_mail=False)
-    logger.info('Finished %s', identifier2)
+    app.logger.info('Finished %s', identifier2)
 
 if __name__ == '__main__':
-    logger = logging.getLogger()
     handler = logging.StreamHandler()
     formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
     handler.setFormatter(formatter)
-    logger.addHandler(handler)
-    logger.setLevel(logging.DEBUG)
+    app.logger.addHandler(handler)
+    app.logger.setLevel(logging.INFO)
 
-    calls_logger = logging.getLogger(__name__)
-    calls_logger.setLevel(logging.INFO)
-    calls_handler = logging.FileHandler(os.path.join(UPLOAD_FOLDER,'00webapp.log'))
-    calls_logger.addHandler(calls_handler)
-
-
-    logger.debug("Starting")
+    app.logger.debug("Starting")
     app.jinja_env.auto_reload = True
     app.config['TEMPLATES_AUTO_RELOAD'] = True
     app.run(host='0.0.0.0', port=5002, threaded=True, debug=True)
