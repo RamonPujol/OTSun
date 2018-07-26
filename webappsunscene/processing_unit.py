@@ -1,22 +1,10 @@
 import json
 import os
 import logging
-import pkgutil
-import experiments
-import processors
 import zipfile
+import importlib
 
 logger = logging.getLogger(__name__)
-
-for importer, modname, ispkg in pkgutil.iter_modules(experiments.__path__):
-    logger.info("Found submodule %s (is a package: %s)" % (modname, ispkg))
-    string = "from experiments.%s import experiment as %s" % (modname, modname)
-    exec string
-
-for importer, modname, ispkg in pkgutil.iter_modules(processors.__path__):
-    logger.info("Found submodule %s (is a package: %s)" % (modname, ispkg))
-    string = "from processors.%s import processor as %s" % (modname, modname)
-    exec string
 
 def make_zipfile(output_filename, source_dir):
     relroot = os.path.abspath(os.path.join(source_dir, os.pardir))
@@ -40,15 +28,19 @@ def process_experiment(datafile, root_folder):
 
     # Do the work!
     experiment_id = data.get('experiment', None)
-    callable_experiment = globals().get(experiment_id, None)
-    if callable_experiment:
-        logger.info('experiment is ' + experiment_id)
-        logger.info(str(locals()))
-        callable_experiment = globals()[experiment_id]
-        logger.info("calling:" + experiment_id)
-        callable_experiment(data, root_folder)
-    else:
+
+    try:
+        module = importlib.import_module('experiments.'+experiment_id)
+        exp_callable = module.experiment
+    except:
         raise ValueError('The experiment is not implemented', experiment_id)
+
+    logger.info("calling %s for %s from process %s",
+                experiment_id,
+                data['identifier'],
+                os.getpid())
+    exp_callable(data, root_folder)
+    logger.info("computation finished for %s", data['identifier'])
     output_folder = os.path.join(root_folder, 'output')
     output_zip = os.path.join(root_folder, 'output.zip')
     make_zipfile(output_zip, output_folder)
@@ -60,16 +52,19 @@ def run_processor(datafile, root_folder):
             data = json.load(fp)
     except IOError:
         data = {}
+
     # Do the work!
     processor_id = data.get('processor', None)
-    callable_processor = globals().get(processor_id, None)
-    if callable_processor:
-        logger.info('processor is ' + processor_id)
-        logger.info(str(locals()))
-        callable_processor = globals()[processor_id]
-        logger.info("calling:" + processor_id)
-        new_data = callable_processor(data, root_folder)
-        return new_data
-    else:
+
+    try:
+        module = importlib.import_module('processors.'+processor_id)
+        proc_callable = module.processor
+    except:
         raise ValueError('The processor is not implemented', processor_id)
+
+    logger.info('processor is ' + processor_id)
+    logger.info(str(locals()))
+    logger.info("calling:" + processor_id)
+    new_data = proc_callable(data, root_folder)
+    return new_data
 

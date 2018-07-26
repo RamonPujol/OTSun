@@ -11,11 +11,11 @@ from webappsunscene.utils.statuslogger import StatusLogger
 
 logger = logging.getLogger(__name__)
 
-
 def experiment(data, root_folder):
     global doc
     global current_scene
 
+    logger.info("experiment from spectral_analysis got called")
     _ROOT = os.path.abspath(os.path.dirname(__file__))
     data_file_spectrum = os.path.join(_ROOT, 'data', 'ASTMG173-direct.txt')
     destfolder = os.path.join(root_folder, 'output')
