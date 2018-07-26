@@ -18,22 +18,17 @@ for importer, modname, ispkg in pkgutil.iter_modules(processors.__path__):
     string = "from processors.%s import processor as %s" % (modname, modname)
     exec string
 
-
-# from experiments.dummy_experiment import experiment as experiment1
-# from experiments.experiment1par import experiment as experiment1par
-# from experiments.dummy_experiment import experiment as dummy_experiment
-
 def make_zipfile(output_filename, source_dir):
     relroot = os.path.abspath(os.path.join(source_dir, os.pardir))
-    with zipfile.ZipFile(output_filename, "w", zipfile.ZIP_DEFLATED) as zip:
+    with zipfile.ZipFile(output_filename, "w", zipfile.ZIP_DEFLATED) as myzip:
         for root, dirs, files in os.walk(source_dir):
             # add directory (needed for empty dirs)
-            zip.write(root, os.path.relpath(root, relroot))
-            for file in files:
-                filename = os.path.join(root, file)
+            myzip.write(root, os.path.relpath(root, relroot))
+            for thefile in files:
+                filename = os.path.join(root, thefile)
                 if os.path.isfile(filename): # regular files only
-                    arcname = os.path.join(os.path.relpath(root, relroot), file)
-                    zip.write(filename, arcname)
+                    arcname = os.path.join(os.path.relpath(root, relroot), thefile)
+                    myzip.write(filename, arcname)
 
 def process_experiment(datafile, root_folder):
     # Take data from datafile and files from folder
