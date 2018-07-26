@@ -10,6 +10,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import threading
 from werkzeug.utils import secure_filename
+import processing_unit
 from processing_unit import process_experiment, run_processor
 from materials import create_material
 import logging
@@ -155,6 +156,7 @@ def node(name, identifier=None):
         data = request.form.to_dict()
         if identifier is None:
             identifier = str(uuid4())
+            data['identifier'] = identifier
         file_ids = request.files
         for file_id in file_ids:
             the_file = request.files[file_id]
@@ -179,6 +181,8 @@ def end_process(identifier):
     global URL_ROOT
     if URL_ROOT is None:
         URL_ROOT = request.url_root
+    app.logger.info("Launching thread for id %s from process %s",
+                    identifier, os.getpid())
     compute_thread = threading.Thread(target=process_request, args=(identifier,))
     compute_thread.start()
     return render_template("end.html", identifier=identifier)
@@ -237,6 +241,14 @@ if __name__ == '__main__':
     handler.setFormatter(formatter)
     app.logger.addHandler(handler)
     app.logger.setLevel(logging.INFO)
+
+    pu_logger = processing_unit.logger
+    pu_logger.addHandler(handler)
+    pu_logger.setLevel(logging.DEBUG)
+
+    exp_logger = logging.getLogger("experiments")
+    exp_logger.addHandler(handler)
+    exp_logger.setLevel(logging.DEBUG)
 
     app.logger.debug("Starting")
     app.jinja_env.auto_reload = True
