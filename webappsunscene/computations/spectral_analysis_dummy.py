@@ -11,7 +11,8 @@ from webappsunscene.utils.statuslogger import StatusLogger
 
 logger = logging.getLogger(__name__)
 
-def experiment(data, root_folder):
+
+def computation(data, root_folder):
     global doc
     global current_scene
 
@@ -26,50 +27,26 @@ def experiment(data, root_folder):
 
     show_in_doc = None
     polarization_vector = None
-    phi = float(data['phi']) + 1.E-9
-    theta = float(data['theta']) + 1.E-9
-    wavelength_ini = float(data['wavelength_ini'])
-    wavelength_end = float(data['wavelength_end']) + 1E-4
-    if data['wavelength_step'] == "":
-        wavelength_step = 1.0
-    else:
-        wavelength_step = float(data['wavelength_step'])
-    number_of_rays = int(data['numrays'])
+    phi = 0.0 + 1.E-9
+    theta = 0.0 + 1.E-9
+    wavelength_ini = 1000.0
+    wavelength_end = 1000.0 + 1E-4
+    wavelength_step = 1.0
+    number_of_rays = 100
 
-    if data['aperture_pv'] == "":
-        aperture_collector_PV = 0
-    else:
-        aperture_collector_PV = float(data['aperture_pv'])
+    aperture_collector_PV = 1000000
+    aperture_collector_Th = 1000000
 
-    if data['aperture_th'] == "":
-        aperture_collector_Th = 0
-    else:
-        aperture_collector_Th = float(data['aperture_th'])
+    direction_distribution = None
 
-    # ---
-    # Inputs for Spectral Analysis
-    # ---
-    # for direction of the source two options: Buie model or main_direction
-    if data['CSR'] == "":
-        direction_distribution = None
-    else:
-        CSR = float(data['CSR'])  # default option main_direction
-        Buie_model = otsun.BuieDistribution(CSR)
-        direction_distribution = Buie_model
-
-    # for the internal quantum efficiency two options: constant value =< 1.0, or data file
-    # internal_quantum_efficiency = 1.0  # default option equal to 1.0
-    # internal_quantum_efficiency = 'D:Ramon_2015/RECERCA/RETOS-2015/Tareas/Proves-FreeCAD-2/materials-PV/iqe.txt'
-    # for integral results three options: ASTMG173-direct (default option), ASTMG173-total, upload data_file_spectrum
-    # --------- end
 
     files_folder = os.path.join(root_folder, 'files')
     freecad_file = os.path.join(files_folder, data['freecad_file'])
     materials_file = os.path.join(files_folder, data['materials_file'])
 
+    otsun.Material.by_name = {}
     otsun.Material.load_from_zipfile(materials_file)
-    FreeCAD.openDocument(freecad_file)
-    doc = FreeCAD.ActiveDocument
+    doc = FreeCAD.openDocument(freecad_file)
 
     sel = doc.Objects
     current_scene = otsun.Scene(sel)
@@ -77,9 +54,6 @@ def experiment(data, root_folder):
     manager = multiprocessing.Manager()
     statuslogger = StatusLogger(manager, 0, root_folder)
 
-    # ---
-    # Magnitudes used for outputs in Spectral Analysis
-    # ---
     captured_energy_pv = 0.0
     captured_energy_th = 0.0
     source_wavelength = []
@@ -89,12 +63,7 @@ def experiment(data, root_folder):
     PV_energy = []
     PV_wavelength = []
     PV_values = []
-    # --------- end
 
-    # time
-    # t0 = time.time()
-
-    # objects for scene
     sel = doc.Objects
     current_scene = otsun.Scene(sel)
 
@@ -110,31 +79,26 @@ def experiment(data, root_folder):
         l_s = otsun.LightSource(current_scene, emitting_region, light_spectrum, 1.0, direction_distribution,
                                    polarization_vector)
         exp = otsun.Experiment(current_scene, l_s, number_of_rays, show_in_doc)
-        exp.run()
-        # print ("%s" % (w) + '\n')
+        logger.info("launching experiment %s", [w, main_direction])
+        try:
+            exp.run()
+        except:
+            logger.error("computation ended with an error")
+            continue
         Th_energy.append(exp.Th_energy)
         Th_wavelength.append(exp.Th_wavelength)
         PV_energy.append(exp.PV_energy)
         PV_wavelength.append(exp.PV_wavelength)
-        #   gran memoria podriem posar opcional
-        # source_wavelength.append(exp.wavelengths)
         source_wavelength.append(w)
         if exp.PV_values:
             PV_values.append(exp.PV_values)
         if exp.points_absorber_Th:
             Th_points_absorber.append(exp.points_absorber_Th)
-        #   end gran memoria podriem posar opcional
         captured_energy_pv += exp.captured_energy_PV
         captured_energy_th += exp.captured_energy_Th
 
         statuslogger.increment()
 
-    # t1 = time.time()
-    # print t1 - t0
-
-    # ---
-    # Output file for wavelengths emitted by the source
-    # ---
     data_source_wavelength = np.array(source_wavelength)
     data_source_wavelength = data_source_wavelength.T
     source_wavelengths_file = os.path.join(destfolder, 'source_wavelengths.txt')
@@ -147,23 +111,11 @@ def experiment(data, root_folder):
         outfile_source_wavelengths.write("%s %s\n" % (wavelength_end, "# Wavelength final in nm"))
         outfile_source_wavelengths.write("%s %s\n" % (wavelength_step, "# Step of wavelength in nm"))
         outfile_source_wavelengths.write("%s %s\n" % (number_of_rays, "# Rays per wavelength"))
-        # np.savetxt(outfile_source_wavelengths, data_source_wavelength, fmt=['%f'])
 
-    # --------- end
 
-    # t2 = time.time()
-    # print t2 - t1
-
-    # ---
-    # Output source spectrum for calculation and total energy emitted
-    # ---
     source_spectrum = otsun.spectrum_to_constant_step(data_file_spectrum, 0.5, wavelength_ini, wavelength_end)
     energy_emitted = np.trapz(source_spectrum[:, 1], x=source_spectrum[:, 0])
-    # --------- end
 
-    # ---
-    # Outputs for thermal absorber materials (Th) in Spectral Analysis
-    # ---
     if captured_energy_th > 1E-9:
         data_Th_points_absorber = np.array(np.concatenate(Th_points_absorber))
         table_Th = otsun.make_histogram_from_experiment_results(Th_wavelength, Th_energy, wavelength_step,
@@ -191,15 +143,7 @@ def experiment(data, root_folder):
                 power_absorbed_from_source_Th * aperture_collector_Th * 1E-6,
                 energy_emitted,
                 efficiency_from_source_Th))
-        # print power_absorbed_from_source_Th * aperture_collector_Th * 1E-6,
-        # energy_emitted * exp.light_source.emitting_region.aperture * 1E-6, efficiency_from_source_Th
 
-    # --------- end
-    # t3 = time.time()
-    # print t3 - t2
-    # ---
-    # Outputs for photovoltaic materials (PV) in Spectral Analysis
-    # ---
     if captured_energy_pv > 1E-9:
         data_PV_values = np.array(np.concatenate(PV_values))
         table_PV = otsun.make_histogram_from_experiment_results(PV_wavelength, PV_energy, wavelength_step,
@@ -209,10 +153,6 @@ def experiment(data, root_folder):
         spectrum_by_table_PV_05 = source_spectrum[:, 1] * table_PV_05[:, 1]
         power_absorbed_from_source_PV = np.trapz(spectrum_by_table_PV_05, x=source_spectrum[:, 0])
         efficiency_from_source_PV = power_absorbed_from_source_PV / energy_emitted
-
-        # iqe = internal_quantum_efficiency
-        # SR = otsun.spectral_response(table_PV, iqe)
-        # ph_cu = otsun.photo_current(SR, source_spectrum)
 
         with open(os.path.join(destfolder, 'PV_spectral_efficiency.txt'), 'w') as outfile_PV_spectral:
             outfile_PV_spectral.write("%s\n" % ("#wavelength(nm) efficiency_PV_absorbed"))
@@ -224,20 +164,3 @@ def experiment(data, root_folder):
             np.savetxt(outfile_PV_paths_values, data_PV_values,
                        fmt=['%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f'])
 
-        # with open(os.path.join(destfolder, 'spectral_response_PV-a.txt'), 'w') as outfile_spectral_response_PV:
-         #   np.savetxt(outfile_spectral_response_PV, SR, fmt=['%f', '%f'])
-
-        #with open(os.path.join(destfolder, 'PV_integral_spectrum-a.txt'), 'w') as outfile_PV_integral_spectrum:
-        #    outfile_PV_integral_spectrum.write("%s %s %s %s\n" % (
-        #        "# power_absorbed_from_source_PV;   ", "energy_emitted;   ", "efficiency_from_source_PV;   ",
-        #        "photocurrent (A/m2);   "))
-        #    outfile_PV_integral_spectrum.write("%s %s %s\n" % (
-        #        power_absorbed_from_source_PV * aperture_pv * 1E-6,
-        #        energy_emitted * exp.light_source.emitting_region.aperture * 1E-6,
-        #        efficiency_from_source_PV))
-        # print power_absorbed_from_source_PV * aperture_collector_PV * 1E-6,
-        # energy_emitted * exp.light_source.emitting_region.aperture * 1E-6, efficiency_from_source_PV, ph_cu
-
-    # --------- end
-    # t4 = time.time()
-    # print t4 - t3

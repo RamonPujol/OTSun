@@ -73,7 +73,7 @@ def compute(args):
     # return the results
     return (ph, th, w, efficiency, exp.PV_energy, exp.PV_wavelength, exp.PV_values)
 
-def experiment(data, root_folder):
+def computation(data, root_folder):
     global current_scene
     global doc
 

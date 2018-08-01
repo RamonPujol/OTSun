@@ -43,7 +43,7 @@ def compute(args):
     except:
         logger.debug("Failed with parameters: %s", args)
 
-def experiment(data, root_folder):
+def computation(data, root_folder):
     global current_scene
     #global doc
 

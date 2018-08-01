@@ -29,8 +29,8 @@ def create_material(data, files):
     kind_of_material = data['kind_of_material']
     if kind_of_material == 'constant_ior':
         otsun.create_simple_volume_material(data['name'],
-                                               float(data['ior']),
-                                               None if data['at_co'] == '' else float(data['at_co']))
+                                            float(data['ior']),
+                                            None if data['at_co'] == '' else float(data['at_co']))
     elif kind_of_material == 'variable_ior':
         otsun.create_wavelength_volume_material(data['name'], files['ior_file'])
     elif kind_of_material == 'PV_volume':
@@ -39,17 +39,17 @@ def create_material(data, files):
         if data['front_vacuum']:
             if data['back_vacuum']:
                 otsun.create_polarized_thin_film(data['name'], files['thin_film_file'],
-                                                    "Vacuum", "Vacuum")
+                                                 "Vacuum", "Vacuum")
             else:
                 otsun.create_polarized_thin_film(data['name'], files['thin_film_file'],
-                                                    "Vacuum", files['back_file'])
+                                                 "Vacuum", files['back_file'])
         else:
             if data['back_vacuum']:
                 otsun.create_polarized_thin_film(data['name'], files['thin_film_file'],
-                                                    files['front_file'], "Vacuum")
+                                                 files['front_file'], "Vacuum")
             else:
                 otsun.create_polarized_thin_film(data['name'], files['thin_film_file'],
-                                                    files['front_file'], files['back_file'])
+                                                 files['front_file'], files['back_file'])
 
     elif kind_of_material == 'opaque_simple_layer':
         otsun.create_opaque_simple_layer(data['name'])
@@ -61,23 +61,23 @@ def create_material(data, files):
         otsun.create_absorber_lambertian_layer(data['name'], float(data['poa']))
     elif kind_of_material == 'absorber_TW_model_layer':
         otsun.create_absorber_TW_model_layer(data['name'],
-                                                float(data['poa']),
-                                                float(data['b_constant']),
-                                                float(data['c_constant']))
+                                             float(data['poa']),
+                                             float(data['b_constant']),
+                                             float(data['c_constant']))
     elif kind_of_material == 'reflector_specular_layer':
         otsun.create_reflector_specular_layer(data['name'],
-                                                 float(data['por']),
-                                                 None if data['sigma_1'] == '' else float(data['sigma_1']),
-                                                 None if data['sigma_2'] == '' else float(data['sigma_2']),
-                                                 None if data['k'] == '' else float(data['k']))
+                                              float(data['por']),
+                                              None if data['sigma_1'] == '' else float(data['sigma_1']),
+                                              None if data['sigma_2'] == '' else float(data['sigma_2']),
+                                              None if data['k'] == '' else float(data['k']))
     elif kind_of_material == 'reflector_lambertian_layer':
         otsun.create_reflector_lambertian_layer(data['name'], float(data['por']))
     elif kind_of_material == 'metallic_specular_layer':
         otsun.create_metallic_specular_layer(data['name'],
-                                                files['ior_file'],
-                                                None if data['sigma_1'] == '' else float(data['sigma_1']),
-                                                None if data['sigma_2'] == '' else float(data['sigma_2']),
-                                                None if data['k'] == '' else float(data['k']))
+                                             files['ior_file'],
+                                             None if data['sigma_1'] == '' else float(data['sigma_1']),
+                                             None if data['sigma_2'] == '' else float(data['sigma_2']),
+                                             None if data['k'] == '' else float(data['k']))
     elif kind_of_material == 'metallic_lambertian_layer':
         otsun.create_metallic_lambertian_layer(data['name'], files['ior_file'])
     elif kind_of_material == 'polarized_coating_reflector_layer':

@@ -11,7 +11,7 @@ import time
 
 logger=logging.getLogger(__name__)
 
-def processor(data, root_folder):
+def computation(data, root_folder):
     files_folder = os.path.join(root_folder, 'files')
     freecad_file = os.path.join(files_folder, data['freecad_file'])
     FreeCAD.openDocument(freecad_file)
