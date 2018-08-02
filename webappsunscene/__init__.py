@@ -230,20 +230,18 @@ def process_computation(identifier,
         raise ValueError('The computation is not implemented', computation_name)
 
     fh = logging.FileHandler(os.path.join(dir_name, "computations.log"))
-    fh.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(asctime)s %(levelname)-8s:%(name)s:%(funcName)s:%(message)s')
+    fh.setLevel(TRACE)
+    formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(name)s %(funcName)s: %(message)s')
     fh.setFormatter(formatter)
+
     app.logger.addHandler(fh)
 
-    try:
-        module_logger = module.logger
-        module_logger.addHandler(fh)
-    except AttributeError:
-        pass
+    module_logger = logging.getLogger('webappsunscene.computations.'+computation_name)
+    module_logger.setLevel(logging.DEBUG)
+    module_logger.addHandler(fh)
 
     otsun_logger = logging.getLogger('otsun')
     otsun_logger.setLevel(TRACE)
-    fh.setLevel(TRACE)
     otsun_logger.addHandler(fh)
 
     app.logger.info("calling %s for %s from process %s",
@@ -252,6 +250,11 @@ def process_computation(identifier,
                     os.getpid())
     result = callable_computation(data, dir_name)
     app.logger.info("computation finished for %s", data['identifier'])
+
+    app.logger.removeHandler(fh)
+    otsun_logger.removeHandler(fh)
+    module_logger.removeHandler(fh)
+
     if should_send_mail:
         output_folder = os.path.join(dir_name, 'output')
         output_zip = os.path.join(dir_name, 'output.zip')
