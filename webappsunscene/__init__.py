@@ -16,7 +16,7 @@ from werkzeug.utils import secure_filename
 # from processing_unit import run_experiment, run_processor
 from materials import create_material
 import logging
-# import autologging
+from autologging import TRACE
 import webappsunscene.default_settings
 import zipfile
 
@@ -212,46 +212,7 @@ def make_zipfile(output_filename, source_dir):
 
 # endregion
 
-# region Access functions for processing unit
-
-
-# def process_experiment(identifier, should_send_mail=True):
-#     """
-#     Processes the request given by the identifier and optionally sends a mail when it is completed
-#
-#     Remark: Calls process_experiment from processing_unit.
-#
-#     Args:
-#         identifier: str
-#         should_send_mail: bool
-#     """
-#     app.logger.info("Processing request for id %s", identifier)
-#     dir_name = root_folder(identifier)
-#     datafile = data_filename(identifier)
-#     run_experiment(datafile, dir_name)
-#     # Send mail with link
-#     data = load_data(identifier)
-#     if should_send_mail:
-#         send_mail(toaddr=data['email'], identifier=identifier)
-#
-#
-# def process_processor(identifier):
-#     """
-#     Runs the processor given by the identifier and returns whatever the processor returns
-#
-#     Remark: Calls run_processor from processing_unit.
-#
-#     Args:
-#         identifier: str
-#
-#     Returns:
-#         Any object returned by the processor
-#     """
-#     app.logger.info("Processing processor for id %s", identifier)
-#     # Call the processing unit
-#     dir_name = root_folder(identifier)
-#     datafile = data_filename(identifier)
-#     return run_processor(datafile, dir_name)
+# region Computation unit
 
 
 def process_computation(identifier,
@@ -267,6 +228,24 @@ def process_computation(identifier,
         callable_computation = module.computation
     except (ImportError, AttributeError):
         raise ValueError('The computation is not implemented', computation_name)
+
+    fh = logging.FileHandler(os.path.join(dir_name, "computations.log"))
+    fh.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s %(levelname)-8s:%(name)s:%(funcName)s:%(message)s')
+    fh.setFormatter(formatter)
+    app.logger.addHandler(fh)
+
+    try:
+        module_logger = module.logger
+        module_logger.addHandler(fh)
+    except AttributeError:
+        pass
+
+    otsun_logger = logging.getLogger('otsun')
+    otsun_logger.setLevel(TRACE)
+    fh.setLevel(TRACE)
+    otsun_logger.addHandler(fh)
+
     app.logger.info("calling %s for %s from process %s",
                     computation_name,
                     data['identifier'],
