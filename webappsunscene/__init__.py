@@ -212,6 +212,21 @@ def make_zipfile(output_filename, source_dir):
 
 # endregion
 
+# region Filter class
+
+
+class FilterByThread(logging.Filter):
+    def __init__(self, thread_id = None):
+        super(FilterByThread, self).__init__()
+        if not thread_id:
+            thread_id = threading.current_thread().ident
+        self.thread_id = thread_id
+
+    def filter(self, record):
+        return record.thread == self.thread_id
+
+# endregion
+
 # region Computation unit
 
 
@@ -233,6 +248,8 @@ def process_computation(identifier,
     fh.setLevel(TRACE)
     formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(name)s %(funcName)s: %(message)s')
     fh.setFormatter(formatter)
+    logfilter = FilterByThread()
+    fh.addFilter(logfilter)
 
     app.logger.addHandler(fh)
 
