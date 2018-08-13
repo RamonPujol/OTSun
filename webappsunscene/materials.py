@@ -12,9 +12,14 @@ import numpy as np
 import time
 import dill
 
+import webappsunscene.default_settings
+UPLOAD_FOLDER = webappsunscene.default_settings.UPLOAD_FOLDER
+config = os.environ.get('OTSUN_CONFIG_FILE')
+if config:
+    execfile(config)
+
 logger = logging.getLogger(__name__)
 
-UPLOAD_FOLDER = '/tmp/WebAppSunScene'
 if not os.path.exists(UPLOAD_FOLDER):
     logger.info('creating upload folder')
     os.makedirs(UPLOAD_FOLDER)
@@ -22,7 +27,6 @@ else:
     if not os.access(UPLOAD_FOLDER, os.W_OK):
         UPLOAD_FOLDER += str(uuid4())
         os.makedirs(UPLOAD_FOLDER)
-
 
 def create_material(data, files):
     logger.debug(data)
@@ -89,11 +93,13 @@ def create_material(data, files):
     elif kind_of_material == 'two_layers_material':
         # name_front = otsun.Material.load_from_file(files['file_front'])
         # name_back = otsun.Material.load_from_file(files['file_back'])
-        mat_front = dill.load(files['file_front'])
-        mat_back = dill.load(files['file_back'])
-        otsun.Material.by_name[mat_back.name] = mat_back
-        otsun.Material.by_name[mat_front.name] = mat_front
-        otsun.create_two_layers_material(data['name'], mat_front.name, mat_back.name)
+        ## mat_front = dill.load(files['file_front'])
+        ## mat_back = dill.load(files['file_back'])
+        mat_front_name = otsun.Material.load_from_json_fileobject(files['file_front'])
+        mat_back_name = otsun.Material.load_from_json_fileobject(files['file_back'])
+        #otsun.Material.by_name[mat_back.name] = mat_back
+        #otsun.Material.by_name[mat_front.name] = mat_front
+        otsun.create_two_layers_material(data['name'], mat_front_name, mat_back_name)
     elif kind_of_material == 'simple_symmetric_surface':
         otsun.create_reflector_lambertian_layer("rlamb", float(data['por']))
         otsun.create_two_layers_material(data['name'], "rlamb", "rlamb")
@@ -102,8 +108,10 @@ def create_material(data, files):
     material = otsun.Material.by_name[data['name']]
     temp_folder = os.path.join(UPLOAD_FOLDER, str(uuid4()))
     os.makedirs(temp_folder)
-    filename = os.path.join(temp_folder, data['name'] + '.rtmaterial')
+    # filename = os.path.join(temp_folder, data['name'] + '.rtmaterial')
     # filename = '/tmp/'+data['name']+'.rtmaterial'
-    with open(filename, 'wb') as f:
-        dill.dump(material, f)
+    # with open(filename, 'wb') as f:
+    #     dill.dump(material, f)
+    filename = os.path.join(temp_folder, data['name'] + '.otmaterial')
+    material.save_to_json_file(filename)
     return filename

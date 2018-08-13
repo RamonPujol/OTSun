@@ -45,7 +45,7 @@ def computation(data, root_folder):
     materials_file = os.path.join(files_folder, data['materials_file'])
 
     otsun.Material.by_name = {}
-    otsun.Material.load_from_zipfile(materials_file)
+    otsun.Material.load_from_json_zip(materials_file)
     doc = FreeCAD.openDocument(freecad_file)
 
     sel = doc.Objects
