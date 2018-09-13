@@ -24,7 +24,6 @@ def computation(data, root_folder):
     except:
         pass  # we suppose it already exists
 
-    show_in_doc = None
     polarization_vector = None
     phi = float(data['phi']) + 1.E-9
     theta = float(data['theta']) + 1.E-9
@@ -34,6 +33,7 @@ def computation(data, root_folder):
         wavelength_step = 1.0
     else:
         wavelength_step = float(data['wavelength_step'])
+
     number_of_rays = int(data['numrays'])
 
     if data['aperture_pv'] == "":
@@ -51,9 +51,9 @@ def computation(data, root_folder):
     # ---
     # for direction of the source two options: Buie model or main_direction
     if data['CSR'] == "":
-        direction_distribution = None
+        direction_distribution = None # default option main_direction
     else:
-        CSR = float(data['CSR'])  # default option main_direction
+        CSR = float(data['CSR'])
         Buie_model = otsun.BuieDistribution(CSR)
         direction_distribution = Buie_model
 
@@ -68,9 +68,8 @@ def computation(data, root_folder):
     materials_file = os.path.join(files_folder, data['materials_file'])
 
     otsun.Material.by_name = {}
-    otsun.Material.load_from_zipfile(materials_file)
+    otsun.Material.load_from_json_zip(materials_file)
     doc = FreeCAD.openDocument(freecad_file)
-    ## doc = FreeCAD.ActiveDocument
 
     sel = doc.Objects
     current_scene = otsun.Scene(sel)
@@ -92,18 +91,12 @@ def computation(data, root_folder):
     PV_values = []
     # --------- end
 
-    # time
-    # t0 = time.time()
-
-    # objects for scene
-    sel = doc.Objects
-    current_scene = otsun.Scene(sel)
-
     number_of_runs = 0
     for _ in np.arange(wavelength_ini, wavelength_end, wavelength_step):
         number_of_runs += 1
 
     statuslogger.total = number_of_runs
+    show_in_doc = None
     for w in np.arange(wavelength_ini, wavelength_end, wavelength_step):
         light_spectrum = w
         main_direction = otsun.polar_to_cartesian(phi, theta) * -1.0  # Sun direction vector
@@ -117,19 +110,15 @@ def computation(data, root_folder):
         except:
             logger.error("computation ended with an error")
             continue
-        # print ("%s" % (w) + '\n')
         Th_energy.append(exp.Th_energy)
         Th_wavelength.append(exp.Th_wavelength)
         PV_energy.append(exp.PV_energy)
         PV_wavelength.append(exp.PV_wavelength)
-        #   gran memoria podriem posar opcional
-        # source_wavelength.append(exp.wavelengths)
         source_wavelength.append(w)
         if exp.PV_values:
             PV_values.append(exp.PV_values)
         if exp.points_absorber_Th:
             Th_points_absorber.append(exp.points_absorber_Th)
-        #   end gran memoria podriem posar opcional
         captured_energy_pv += exp.captured_energy_PV
         captured_energy_th += exp.captured_energy_Th
 

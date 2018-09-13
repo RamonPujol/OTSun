@@ -421,7 +421,7 @@ def send_file(identifier=None):
     """
     if identifier is None:
         return "No process job specified"
-    return send_from_directory(root_folder(identifier), 'output.zip', as_attachment=True)
+    return send_from_directory(root_folder(identifier), 'output.zip')
 
 
 @app.route('/static_file/<path:filename>')

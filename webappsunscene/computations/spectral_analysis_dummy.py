@@ -11,7 +11,6 @@ from webappsunscene.utils.statuslogger import StatusLogger
 
 logger = logging.getLogger(__name__)
 
-
 def computation(data, root_folder):
     global doc
     global current_scene
