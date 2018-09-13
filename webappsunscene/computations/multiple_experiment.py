@@ -10,7 +10,7 @@ import numpy as np
 import multiprocessing
 from webappsunscene.utils.statuslogger import StatusLogger
 
-logger=logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def compute(args):

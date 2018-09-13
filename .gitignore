@@ -19,3 +19,6 @@ WebAppSunScene.egg-info
 secret_settings.py
 scheme_calls.graphml
 otsun.py
+*.sh
+comandes.txt
+raytrace.py

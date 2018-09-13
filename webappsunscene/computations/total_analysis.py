@@ -11,15 +11,11 @@ from webappsunscene.utils.statuslogger import StatusLogger
 
 logger = logging.getLogger(__name__)
 
-
 def computation(data, root_folder):
     global doc
     global current_scene
 
-    CSR = 0.05
-    Buie_model = otsun.BuieDistribution(CSR)
-    direction_distribution = Buie_model
-
+    logger.info("experiment from total_analysis got called")
     _ROOT = os.path.abspath(os.path.dirname(__file__))
     data_file_spectrum = os.path.join(_ROOT, 'data', 'ASTMG173-direct.txt')
     destfolder = os.path.join(root_folder, 'output')
@@ -28,7 +24,6 @@ def computation(data, root_folder):
     except:
         pass  # we suppose it already exists
 
-    show_in_doc = None
     polarization_vector = None
     phi_ini = float(data['phi_ini']) + 1.E-9
     phi_end = float(data['phi_end']) + 1.E-4
@@ -44,34 +39,38 @@ def computation(data, root_folder):
     else:
         theta_step = float(data['theta_step'])
 
+    number_of_rays = int(data['numrays'])
+
     if data['aperture_pv'] == "":
         aperture_collector_PV = 0
     else:
         aperture_collector_PV = float(data['aperture_pv'])
 
     if data['aperture_th'] == "":
-        aperture_collector_Th= 0
+        aperture_collector_Th = 0
     else:
         aperture_collector_Th = float(data['aperture_th'])
 
+    # ---
+    # Inputs for Total Analysis
+    # ---
     # for direction of the source two options: Buie model or main_direction
     if data['CSR'] == "":
-        direction_distribution = None
+        direction_distribution = None # default option main_direction
     else:
-        direction_distribution = float(data['CSR'])  # default option main_direction
+        CSR = float(data['CSR'])
         Buie_model = otsun.BuieDistribution(CSR)
         direction_distribution = Buie_model
 
     light_spectrum = otsun.create_CDF_from_PDF(data_file_spectrum)
 
-    number_of_rays = int(data['numrays'])
     files_folder = os.path.join(root_folder, 'files')
     freecad_file = os.path.join(files_folder, data['freecad_file'])
     materials_file = os.path.join(files_folder, data['materials_file'])
 
-    otsun.Material.load_from_zipfile(materials_file)
-    FreeCAD.openDocument(freecad_file)
-    doc = FreeCAD.ActiveDocument
+    otsun.Material.by_name = {}
+    otsun.Material.load_from_json_zip(materials_file)
+    doc = FreeCAD.openDocument(freecad_file)
 
     sel = doc.Objects
     current_scene = otsun.Scene(sel)
@@ -85,7 +84,7 @@ def computation(data, root_folder):
             number_of_runs += 1
 
     statuslogger.total = number_of_runs
-
+    show_in_doc = None
     results = []
     for ph in np.arange(phi_ini, phi_end, phi_step):
         for th in np.arange(theta_ini, theta_end, theta_step):
@@ -94,7 +93,12 @@ def computation(data, root_folder):
             l_s = otsun.LightSource(current_scene, emitting_region, light_spectrum, 1.0, direction_distribution,
                                        polarization_vector)
             exp = otsun.Experiment(current_scene, l_s, number_of_rays, show_in_doc)
-            exp.run()
+            logger.info("launching experiment %s", [ph, th, main_direction])
+            try:
+                exp.run()
+            except:
+                logger.error("computation ended with an error")
+                continue
             if aperture_collector_Th != 0.0:
                 efficiency_from_source_th = (exp.captured_energy_Th /aperture_collector_Th) / (
                         exp.number_of_rays/exp.light_source.emitting_region.aperture)
