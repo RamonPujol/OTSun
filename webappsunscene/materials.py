@@ -1,4 +1,3 @@
-import io
 import logging
 import sys
 import os
@@ -6,17 +5,15 @@ from uuid import uuid4
 
 sys.path.append("/usr/lib/freecad")
 sys.path.append("/usr/lib/freecad/lib")
-import FreeCAD
 import otsun
-import numpy as np
-import time
 # import dill
 
-import webappsunscene.default_settings
-UPLOAD_FOLDER = webappsunscene.default_settings.UPLOAD_FOLDER
-config = os.environ.get('OTSUN_CONFIG_FILE')
-if config:
-    execfile(config)
+import dummy.default_settings
+UPLOAD_FOLDER = "/tmp/" # dummy.default_settings.UPLOAD_FOLDER
+# TODO: customize
+#config = os.environ.get('OTSUN_CONFIG_FILE')
+#if config:
+#    execfile(config)
 
 logger = logging.getLogger(__name__)
 
