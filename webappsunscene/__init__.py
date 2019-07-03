@@ -473,7 +473,7 @@ def material():
         data = request.form.to_dict()
         app.logger.info("creating material with data: %s", data)
         files = request.files
-        filename = create_material(data, files)
+        filename = create_material(data, files, app.config['UPLOAD_FOLDER'])
         return flask.send_file(filename, as_attachment=True)
 
 # endregion
