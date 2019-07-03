@@ -1,10 +1,11 @@
 from __future__ import print_function
 
 import importlib
-from flask import Flask, request, redirect, render_template, send_from_directory, current_app
+from flask import Flask, request, render_template, send_from_directory, current_app
 import flask
 from uuid import uuid4
 import os
+import sys
 import shutil
 import json
 import smtplib
@@ -44,6 +45,13 @@ MAIL_PORT = app.config['MAIL_PORT']
 APP_NAME = app.config['APP_NAME']
 
 # endregion
+
+def redirect(location):
+    global URL_ROOT
+    if URL_ROOT is None:
+        URL_ROOT = request.url_root
+    return flask.redirect(URL_ROOT+location)
+
 
 # region Helper functions
 

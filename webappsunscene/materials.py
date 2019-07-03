@@ -10,7 +10,7 @@ import FreeCAD
 import otsun
 import numpy as np
 import time
-import dill
+# import dill
 
 import webappsunscene.default_settings
 UPLOAD_FOLDER = webappsunscene.default_settings.UPLOAD_FOLDER
