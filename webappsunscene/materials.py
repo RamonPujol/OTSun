@@ -8,7 +8,7 @@ sys.path.append("/usr/lib/freecad/lib")
 import otsun
 # import dill
 
-import dummy.default_settings
+# import dummy.default_settings
 UPLOAD_FOLDER = "/tmp/" # dummy.default_settings.UPLOAD_FOLDER
 # TODO: customize
 #config = os.environ.get('OTSUN_CONFIG_FILE')
