@@ -22,3 +22,4 @@ otsun.py
 *.sh
 comandes.txt
 raytrace.py
+*.log

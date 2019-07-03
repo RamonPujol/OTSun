@@ -1,0 +1,11 @@
+* fer maquina virtual amb bionic64
+* sudo apt update
+* sudo apt install python-pip
+*  git clone https://github.com/bielcardona/OTSun.git
+* sudo pip install virtualenv
+* virtualenv venv
+* source venv/bin/activate
+* pip install -e OTSun/
+*  sudo apt install freecad
+* pip install flask
+* configurar interpret a pycharm

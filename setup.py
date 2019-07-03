@@ -6,7 +6,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
-    install_requires=['dill==0.2.7.1','Flask', 'otsun', 'numpy', 'autologging'],
+    install_requires=['Flask', 'otsun', 'numpy', 'autologging'],
     license='MIT',
     author='Gabriel Cardona',
     author_email='gabriel.cardona@uib.es',

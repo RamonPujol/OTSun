@@ -1,0 +1,16 @@
+* crear usuari webapp
+* fer directori /home/webapp/v1 i entrar
+* baixar otsun i otsunwebapp 
+* fer virtualenv venv i activar
+* fer pip install -e els dos paquets otsun i otsunwebapp
+* posar dins del <VirtualHost *:80> de /etc/apache2/sites-available/000-default.conf
+la configuracio:
+WSGIDaemonProcess webappsunscene user=webapp group=webapp python-home=/home/webapp/v1/venv
+WSGIScriptAlias /webappsunscene /home/webapp/v1/server.wsgi
+<Directory /home/webapp/v1>
+        WSGIApplicationGroup %{GLOBAL}
+        WSGIProcessGroup webappsunscene
+        Order deny,allow
+        Allow from all
+        Require all granted
+</Directory>
