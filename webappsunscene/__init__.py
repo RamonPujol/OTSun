@@ -5,7 +5,6 @@ from flask import Flask, request, render_template, send_from_directory, current_
 import flask
 from uuid import uuid4
 import os
-import sys
 import shutil
 import json
 import smtplib
@@ -18,15 +17,22 @@ from werkzeug.utils import secure_filename
 from materials import create_material
 import logging
 from autologging import TRACE
-import webappsunscene.default_settings
 import zipfile
 
 # region Config app and global variables
 
 
 app = Flask(__name__, static_url_path='/static_file')
-app.config.from_object(webappsunscene.default_settings)
-app.config.from_envvar("OTSUN_CONFIG_FILE", silent=True)
+## app.config.from_object(webappsunscene.default_settings)
+## app.config.from_envvar("OTSUN_CONFIG_FILE", silent=True)
+app.config.from_mapping(
+    APP_NAME="OTSunWebApp Development",
+    UPLOAD_FOLDER = '/tmp/OTSunDevelopmentServer',
+    MAIL_SENDER = None,
+    MAIL_SERVER = None,
+    MAIL_PASSWD = None,
+    MAIL_PORT = None
+)
 
 UPLOAD_FOLDER = app.config['UPLOAD_FOLDER']
 if not os.path.exists(UPLOAD_FOLDER):
@@ -38,11 +44,6 @@ else:
         os.makedirs(UPLOAD_FOLDER)
 URL_ROOT = None
 
-MAIL_SENDER = app.config['MAIL_SENDER']
-MAIL_SERVER = app.config['MAIL_SERVER']
-MAIL_PASSWD = app.config['MAIL_PASSWD']
-MAIL_PORT = app.config['MAIL_PORT']
-APP_NAME = app.config['APP_NAME']
 
 # endregion
 
@@ -173,14 +174,17 @@ def send_mail(toaddr, identifier):
         identifier: str
     """
     app.logger.info("Sending mail for id %s", identifier)
-    fromaddr = MAIL_SENDER
-    frompasswd = MAIL_PASSWD
+    if not app.config['MAIL_SENDER']:
+        app.logger.info("Mail aborted... no server configured")
+        return
+    fromaddr = app.config['MAIL_SENDER']
+    frompasswd = app.config['MAIL_PASSWD']
 
     msg = MIMEMultipart()
 
     msg['From'] = fromaddr
     msg['To'] = toaddr
-    msg['Subject'] = "Results of computation of %s" % APP_NAME
+    msg['Subject'] = "Results of computation of %s" % app.config['APP_NAME']
 
     body = """\
     <html>
@@ -191,7 +195,7 @@ def send_mail(toaddr, identifier):
 
     msg.attach(MIMEText(body, 'html'))
 
-    server = smtplib.SMTP(MAIL_SERVER, MAIL_PORT)
+    server = smtplib.SMTP(app.config['MAIL_SERVER'], app.config['MAIL_PORT'])
     server.starttls()
     server.login(fromaddr, frompasswd)
     text = msg.as_string()
