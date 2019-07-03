@@ -5,6 +5,7 @@ application.config.from_mapping(
     UPLOAD_FOLDER = '/tmp/OTSunDevelopmentServer',
     MAIL_SENDER = None,
     MAIL_SERVER = None,
+    MAIL_USERNAME = None,
     MAIL_PASSWD = None,
     MAIL_PORT = None
 )

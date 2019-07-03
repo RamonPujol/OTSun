@@ -30,6 +30,7 @@ app.config.from_mapping(
     UPLOAD_FOLDER = '/tmp/OTSunDevelopmentServer',
     MAIL_SENDER = None,
     MAIL_SERVER = None,
+    MAIL_USERNAME = None,
     MAIL_PASSWD = None,
     MAIL_PORT = None
 )
@@ -178,7 +179,8 @@ def send_mail(toaddr, identifier):
         app.logger.info("Mail aborted... no server configured")
         return
     fromaddr = app.config['MAIL_SENDER']
-    frompasswd = app.config['MAIL_PASSWD']
+    username = app.config['MAIL_USERNAME']
+    passwd = app.config['MAIL_PASSWD']
 
     msg = MIMEMultipart()
 
@@ -197,7 +199,7 @@ def send_mail(toaddr, identifier):
 
     server = smtplib.SMTP(app.config['MAIL_SERVER'], app.config['MAIL_PORT'])
     server.starttls()
-    server.login(fromaddr, frompasswd)
+    server.login(username, passwd)
     text = msg.as_string()
     server.sendmail(fromaddr, toaddr, text)
     server.quit()
