@@ -3,14 +3,28 @@
 * baixar otsun i otsunwebapp 
 * fer virtualenv venv i activar
 * fer pip install -e els dos paquets otsun i otsunwebapp
+* copiar OTSunWebApp/sample_server.py a /home/webapp/v1/server.wsgi
 * posar dins del <VirtualHost *:80> de /etc/apache2/sites-available/000-default.conf
 la configuracio:
-WSGIDaemonProcess webappsunscene user=webapp group=webapp python-home=/home/webapp/v1/venv
-WSGIScriptAlias /webappsunscene /home/webapp/v1/server.wsgi
-<Directory /home/webapp/v1>
+--
+   WSGIDaemonProcess webappsunscene user=webapp group=webapp python-home=/home/webapp/v1/venv
+    WSGIScriptAlias /webappsunscene /home/webapp/v1/server.wsgi process-group=webappsunscene application-group=%{GLOBAL}
+    <Directory /home/webapp/v1>
         WSGIApplicationGroup %{GLOBAL}
         WSGIProcessGroup webappsunscene
         Order deny,allow
         Allow from all
         Require all granted
-</Directory>
+    </Directory>
+
+   WSGIDaemonProcess prova user=webapp group=webapp python-home=/home/webapp/prova/venv
+    WSGIScriptAlias /prova /home/webapp/prova/server.py process-group=prova application-group=%{GLOBAL}
+    <Directory /home/webapp/prova>
+        WSGIApplicationGroup %{GLOBAL}
+        WSGIProcessGroup webappsunscene
+        Order deny,allow
+        Allow from all
+        Require all granted
+    </Directory>
+--
+* sudo service apache2 restart
