@@ -62,7 +62,7 @@ def root_folder(identifier):
     """
     Returns the root folder where all files related to the given identifier are saved
     """
-    folder = os.path.join(UPLOAD_FOLDER, identifier)
+    folder = os.path.join(app.config['UPLOAD_FOLDER'], identifier)
     if not os.path.exists(folder):
         os.makedirs(folder)
     return folder
