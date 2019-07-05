@@ -1,4 +1,5 @@
-* fer maquina virtual amb bionic64
+* fer maquina virtual amb bionic64 (Vagrantfile preparat)
+* A la maquina virtual:
 * sudo apt update
 * sudo apt install python-pip
 *  git clone https://github.com/bielcardona/OTSun.git

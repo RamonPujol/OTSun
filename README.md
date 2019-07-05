@@ -2,45 +2,7 @@
 
 ## Installation
 
-### 1. Installing the package
-
-- Create a folder inside an user account: ``mkdir /home/theuser/webappsunscene``
-- Move inside that folder: ``cd /home/theuser/webappsunscene``
-- create a virtualenv: ``virtualenv venv``
-- Activate the virtual environment: `source venv/bin/activate` 
-- Get ``webappsunscene-X.X.tar.gz`` and install it (and its dependencies) using `pip`
-`pip install webappsunscene-X.X.tar.gz`
-
-### 2. Install the webtool
-
-- Create a wsgi file ``/home/theuser/webapp/webappsunscene/webappsunscene.wsgi`` with contents
-    ```
-    from webappsunscene import app as application
-    ```
-- For apache2 servers:
-
-  - Enable the wsgi mod: `a2enmod wsgi`
-  - Change the default site file, located in 
-  `/etc/apache2/sites-available/000-default.conf`
-  and make sure it contains (tune it to your needs):
-    ```
-    <VirtualHost *:80>
-    ServerName example.com 
-
-    WSGIDaemonProcess webappsunscene user=theuser group=theuser python-home=/home/theuser/webappsunscene/venv
-    WSGIScriptAlias /webappsunscene /home/theuser/webappsunscene/webappsunscene.wsgi
-    <Directory /home/theuser/webappsunscene>
-        WSGIApplicationGroup %{GLOBAL}
-        WSGIProcessGroup webappsunscene
-        Order deny,allow
-        Allow from all
-	Require all granted
-    </Directory>
-
-    </VirtualHost>
-    ```
-  - Restart the server: `service apache2 restart`
-  
+See `install.txt` or `install_local.txt`
 
 ## Adding new features (Architecture)
 
