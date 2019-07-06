@@ -21,7 +21,7 @@ la configuracio:
     WSGIScriptAlias /prova /home/webapp/prova/server.py process-group=prova application-group=%{GLOBAL}
     <Directory /home/webapp/prova>
         WSGIApplicationGroup %{GLOBAL}
-        WSGIProcessGroup webappsunscene
+        WSGIProcessGroup prova
         Order deny,allow
         Allow from all
         Require all granted
