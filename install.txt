@@ -3,7 +3,7 @@
 * baixar otsun i otsunwebapp 
 * fer virtualenv venv i activar
 * fer pip install -e els dos paquets otsun i otsunwebapp
-* copiar OTSunWebApp/sample_server.py a /home/webapp/v1/server.wsgi
+* copiar OTSunWebApp/sample_server.py a /home/webapp/v1/server.wsgi (i tunejar)
 * posar dins del <VirtualHost *:80> de /etc/apache2/sites-available/000-default.conf
 la configuracio:
 --
