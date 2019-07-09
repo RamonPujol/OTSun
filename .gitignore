@@ -17,8 +17,9 @@ WebAppSunScene.egg-info
 secret_settings.py
 scheme_calls.graphml
 otsun.py
-*.sh
 comandes.txt
 raytrace.py
 *.log
 OTSunWebApp.egg-info
+bootstrap.sh
+bootstrap_user.sh
