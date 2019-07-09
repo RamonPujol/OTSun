@@ -1,4 +1,4 @@
 The provided Vagrantfile is prepared to provision a virtual machine with everything installed.
 Once the machine is up, ssh into it and execute the python script:
 python /vagrant/webappsunscene/__init__.py
-(or run it through pycharm, etc)
+(or run it through pycharm, configure as a flask app, etc.)
