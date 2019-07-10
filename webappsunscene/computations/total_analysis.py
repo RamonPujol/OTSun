@@ -62,7 +62,7 @@ def computation(data, root_folder):
         Buie_model = otsun.BuieDistribution(CSR)
         direction_distribution = Buie_model
 
-    light_spectrum = otsun.create_CDF_from_PDF(data_file_spectrum)
+    light_spectrum = otsun.cdf_from_pdf_file(data_file_spectrum)
 
     files_folder = os.path.join(root_folder, 'files')
     freecad_file = os.path.join(files_folder, data['freecad_file'])
