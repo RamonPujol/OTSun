@@ -1,10 +1,10 @@
-import logging
 import sys
+import otsun
+import logging
 import os
 sys.path.append("/usr/lib/freecad")
 sys.path.append("/usr/lib/freecad/lib")
 import FreeCAD
-import otsun
 import numpy as np
 import multiprocessing
 from webappsunscene.utils.statuslogger import StatusLogger
@@ -17,7 +17,7 @@ def computation(data, root_folder):
 
     logger.info("experiment from drawing_experiment got called")
     _ROOT = os.path.abspath(os.path.dirname(__file__))
-    data_file_spectrum = os.path.join(_ROOT, 'data', 'ASTMG173-direct.txt')
+#    data_file_spectrum = os.path.join(_ROOT, 'data', 'ASTMG173-direct.txt')
     destfolder = os.path.join(root_folder, 'output')
     try:
         os.makedirs(destfolder)
@@ -25,8 +25,8 @@ def computation(data, root_folder):
         pass  # we suppose it already exists
 
     polarization_vector = None
-    phi = float(data['phi']) + 1.E-9
-    theta = float(data['theta']) + 1.E-9
+    phi = float(data['phi'])
+    theta = float(data['theta'])
     wavelength = float(data['wavelength'])
     number_of_rays = int(data['numrays'])
 
@@ -48,8 +48,9 @@ def computation(data, root_folder):
         direction_distribution = None # default option main_direction
     else:
         CSR = float(data['CSR'])
-        Buie_model = otsun.BuieDistribution(CSR)
+        Buie_model = otsun.buie_distribution(CSR)
         direction_distribution = Buie_model
+    # --------- end
 
     files_folder = os.path.join(root_folder, 'files')
     freecad_file = os.path.join(files_folder, data['freecad_file'])
@@ -58,7 +59,7 @@ def computation(data, root_folder):
     otsun.Material.by_name = {}
     otsun.Material.load_from_json_zip(materials_file)
     doc = FreeCAD.openDocument(freecad_file)
-
+    show_in_doc = doc
     sel = doc.Objects
     current_scene = otsun.Scene(sel)
 
@@ -68,8 +69,8 @@ def computation(data, root_folder):
     # ---
     # Magnitudes used for outputs in Spectral Analysis
     # ---
-    captured_energy_pv = 0.0
-    captured_energy_th = 0.0
+    captured_energy_PV = 0.0
+    captured_energy_Th = 0.0
     source_wavelength = []
     Th_energy = []
     Th_wavelength = []
@@ -82,7 +83,6 @@ def computation(data, root_folder):
     number_of_runs = 1
 
     statuslogger.total = number_of_runs
-    show_in_doc = doc
     w = wavelength
     light_spectrum = w
     main_direction = otsun.polar_to_cartesian(phi, theta) * -1.0  # Sun direction vector
@@ -105,8 +105,8 @@ def computation(data, root_folder):
         PV_values.append(exp.PV_values)
     if exp.points_absorber_Th:
         Th_points_absorber.append(exp.points_absorber_Th)
-    captured_energy_pv += exp.captured_energy_PV
-    captured_energy_th += exp.captured_energy_Th
+    captured_energy_PV += exp.captured_energy_PV
+    captured_energy_Th += exp.captured_energy_Th
 
     statuslogger.increment()
 

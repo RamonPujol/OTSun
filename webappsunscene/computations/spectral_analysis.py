@@ -1,10 +1,10 @@
-import logging
 import sys
+import otsun
+import logging
 import os
 sys.path.append("/usr/lib/freecad")
 sys.path.append("/usr/lib/freecad/lib")
 import FreeCAD
-import otsun
 import numpy as np
 import multiprocessing
 from webappsunscene.utils.statuslogger import StatusLogger
@@ -25,8 +25,8 @@ def computation(data, root_folder):
         pass  # we suppose it already exists
 
     polarization_vector = None
-    phi = float(data['phi']) + 1.E-9
-    theta = float(data['theta']) + 1.E-9
+    phi = float(data['phi'])
+    theta = float(data['theta'])
     wavelength_ini = float(data['wavelength_ini'])
     wavelength_end = float(data['wavelength_end']) + 1E-4
     if data['wavelength_step'] == "":
@@ -54,13 +54,8 @@ def computation(data, root_folder):
         direction_distribution = None # default option main_direction
     else:
         CSR = float(data['CSR'])
-        Buie_model = otsun.BuieDistribution(CSR)
+        Buie_model = otsun.buie_distribution(CSR)
         direction_distribution = Buie_model
-
-    # for the internal quantum efficiency two options: constant value =< 1.0, or data file
-    # internal_quantum_efficiency = 1.0  # default option equal to 1.0
-    # internal_quantum_efficiency = 'D:Ramon_2015/RECERCA/RETOS-2015/Tareas/Proves-FreeCAD-2/materials-PV/iqe.txt'
-    # for integral results three options: ASTMG173-direct (default option), ASTMG173-total, upload data_file_spectrum
     # --------- end
 
     files_folder = os.path.join(root_folder, 'files')
@@ -70,7 +65,7 @@ def computation(data, root_folder):
     otsun.Material.by_name = {}
     otsun.Material.load_from_json_zip(materials_file)
     doc = FreeCAD.openDocument(freecad_file)
-
+    show_in_doc = None
     sel = doc.Objects
     current_scene = otsun.Scene(sel)
 
@@ -80,8 +75,8 @@ def computation(data, root_folder):
     # ---
     # Magnitudes used for outputs in Spectral Analysis
     # ---
-    captured_energy_pv = 0.0
-    captured_energy_th = 0.0
+    captured_energy_PV = 0.0
+    captured_energy_Th = 0.0
     source_wavelength = []
     Th_energy = []
     Th_wavelength = []
@@ -96,7 +91,7 @@ def computation(data, root_folder):
         number_of_runs += 1
 
     statuslogger.total = number_of_runs
-    show_in_doc = None
+
     for w in np.arange(wavelength_ini, wavelength_end, wavelength_step):
         light_spectrum = w
         main_direction = otsun.polar_to_cartesian(phi, theta) * -1.0  # Sun direction vector
@@ -119,13 +114,10 @@ def computation(data, root_folder):
             PV_values.append(exp.PV_values)
         if exp.points_absorber_Th:
             Th_points_absorber.append(exp.points_absorber_Th)
-        captured_energy_pv += exp.captured_energy_PV
-        captured_energy_th += exp.captured_energy_Th
+        captured_energy_PV += exp.captured_energy_PV
+        captured_energy_Th += exp.captured_energy_Th
 
         statuslogger.increment()
-
-    # t1 = time.time()
-    # print t1 - t0
 
     # ---
     # Output file for wavelengths emitted by the source
@@ -146,9 +138,6 @@ def computation(data, root_folder):
 
     # --------- end
 
-    # t2 = time.time()
-    # print t2 - t1
-
     # ---
     # Output source spectrum for calculation and total energy emitted
     # ---
@@ -159,7 +148,7 @@ def computation(data, root_folder):
     # ---
     # Outputs for thermal absorber materials (Th) in Spectral Analysis
     # ---
-    if captured_energy_th > 1E-9:
+    if captured_energy_Th > 1E-9:
         data_Th_points_absorber = np.array(np.concatenate(Th_points_absorber))
         table_Th = otsun.make_histogram_from_experiment_results(Th_wavelength, Th_energy, wavelength_step,
                                                                    aperture_collector_Th,
@@ -190,12 +179,11 @@ def computation(data, root_folder):
         # energy_emitted * exp.light_source.emitting_region.aperture * 1E-6, efficiency_from_source_Th
 
     # --------- end
-    # t3 = time.time()
-    # print t3 - t2
+
     # ---
     # Outputs for photovoltaic materials (PV) in Spectral Analysis
     # ---
-    if captured_energy_pv > 1E-9:
+    if captured_energy_PV > 1E-9:
         data_PV_values = np.array(np.concatenate(PV_values))
         table_PV = otsun.make_histogram_from_experiment_results(PV_wavelength, PV_energy, wavelength_step,
                                                                    aperture_collector_PV,

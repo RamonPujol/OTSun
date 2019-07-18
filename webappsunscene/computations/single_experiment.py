@@ -6,7 +6,6 @@ sys.path.append("/usr/lib/freecad")
 sys.path.append("/usr/lib/freecad/lib")
 import FreeCAD
 import otsun
-import otsun
 import numpy as np
 import time
 from shutil import copy
