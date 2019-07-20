@@ -18,6 +18,7 @@ from materials import create_material
 import logging
 from autologging import TRACE
 import zipfile
+import otsun
 
 # region Config app and global variables
 
@@ -274,6 +275,8 @@ def process_computation(identifier,
     otsun_logger = logging.getLogger('otsun')
     otsun_logger.setLevel(TRACE)
     otsun_logger.addHandler(fh)
+
+    app.logger.info("otsun version is %s", otsun.__version__)
 
     app.logger.info("calling %s for %s from process %s",
                     computation_name,
