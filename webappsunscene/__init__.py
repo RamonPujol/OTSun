@@ -20,6 +20,10 @@ from autologging import TRACE
 import zipfile
 import otsun
 
+from ._version import get_versions
+__version__ = get_versions()['version']
+del get_versions
+
 # region Config app and global variables
 
 
@@ -28,6 +32,7 @@ app = Flask(__name__, static_url_path='/static_file')
 ## app.config.from_envvar("OTSUN_CONFIG_FILE", silent=True)
 app.config.from_mapping(
     APP_NAME="OTSunWebApp Development",
+    VERSION=__version__,
     UPLOAD_FOLDER = '/tmp/OTSunDevelopmentServer',
     MAIL_SENDER = None,
     MAIL_SERVER = None,
@@ -511,19 +516,3 @@ def run_offline(identifier):
 
 # endregion
 
-
-if __name__ == '__main__':
-    handler = logging.StreamHandler()
-    formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
-    handler.setFormatter(formatter)
-    app.logger.addHandler(handler)
-    app.logger.setLevel(logging.DEBUG)
-
-    exp_logger = logging.getLogger("experiments")
-    exp_logger.addHandler(handler)
-    exp_logger.setLevel(logging.DEBUG)
-
-    app.logger.debug("Starting")
-    app.jinja_env.auto_reload = True
-    app.config['TEMPLATES_AUTO_RELOAD'] = True
-    app.run(host='0.0.0.0', port=5002, threaded=True, debug=True)
