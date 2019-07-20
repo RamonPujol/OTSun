@@ -33,6 +33,7 @@ app = Flask(__name__, static_url_path='/static_file')
 app.config.from_mapping(
     APP_NAME="OTSunWebApp Development",
     VERSION=__version__,
+    OTSUN_VERSION=otsun.__version__,
     UPLOAD_FOLDER = '/tmp/OTSunDevelopmentServer',
     MAIL_SENDER = None,
     MAIL_SERVER = None,
