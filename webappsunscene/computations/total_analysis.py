@@ -15,6 +15,9 @@ def computation(data, root_folder):
     global doc
     global current_scene
 
+    manager = multiprocessing.Manager()
+    statuslogger = StatusLogger(manager, 0, root_folder)
+
     logger.info("experiment from total_analysis got called")
     _ROOT = os.path.abspath(os.path.dirname(__file__))
     data_file_spectrum = os.path.join(_ROOT, 'data', 'ASTMG173-direct.txt')
@@ -75,8 +78,6 @@ def computation(data, root_folder):
     sel = doc.Objects
     current_scene = otsun.Scene(sel)
 
-    manager = multiprocessing.Manager()
-    statuslogger = StatusLogger(manager, 0, root_folder)
 
     number_of_runs = 0
     for _ in np.arange(phi_ini, phi_end, phi_step):

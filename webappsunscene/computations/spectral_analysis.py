@@ -15,6 +15,9 @@ def computation(data, root_folder):
     global doc
     global current_scene
 
+    manager = multiprocessing.Manager()
+    statuslogger = StatusLogger(manager, 0, root_folder)
+
     logger.info("experiment from spectral_analysis got called")
     _ROOT = os.path.abspath(os.path.dirname(__file__))
     data_file_spectrum = os.path.join(_ROOT, 'data', 'ASTMG173-direct.txt')
@@ -68,9 +71,6 @@ def computation(data, root_folder):
     show_in_doc = None
     sel = doc.Objects
     current_scene = otsun.Scene(sel)
-
-    manager = multiprocessing.Manager()
-    statuslogger = StatusLogger(manager, 0, root_folder)
 
     # ---
     # Magnitudes used for outputs in Spectral Analysis

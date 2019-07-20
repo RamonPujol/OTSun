@@ -47,6 +47,9 @@ def computation(data, root_folder):
     global current_scene
     #global doc
 
+    manager = multiprocessing.Manager()
+    statuslogger = StatusLogger(manager, 0, root_folder)
+
     phi1 = float(data['phi1']) + 0.000001 #0 + 0.0000001 #
     phi2 = float(data['phi2']) + 0.000001 #0
     phidelta = float(data['phidelta']) #0.1
@@ -73,8 +76,6 @@ def computation(data, root_folder):
     sel = doc.Objects
     current_scene = otsun.Scene(sel)
 
-    manager = multiprocessing.Manager()
-    statuslogger = StatusLogger(manager, 0, root_folder)
 
     list_pars = []
     for ph in np.arange(phi1, phi2, phidelta):
