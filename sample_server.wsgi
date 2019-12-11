@@ -1,23 +1,36 @@
-import sys, os
-mypath = os.path.dirname(__file__)
-sys.path.insert(0, mypath)
-# from webappsunscene import app as application
+import os
+from webappsunscene import app as application
 import logging
 
-def application(environ, start_response):
-    ENVIRONMENT_VARIABLES = [
-            'OTSUN_CONFIG_FILE',
-        ]
-    for key in ENVIRONMENT_VARIABLES:
-        os.environ[key] = environ.get(key)
+def get_dir():
+    this_dir = os.path.dirname(os.path.abspath(__file__))
+    upload_dir = os.path.join(this_dir,'computations')
+    if not os.path.exists(upload_dir):
+        os.makedirs(upload_dir)
+    else:
+        if not os.access(upload_dir, os.W_OK):
+            upload_dir += str(uuid4())
+            os.makedirs(upload_dir)
+    return upload_dir
 
-    from webappsunscene import app
+def get_file():
+    this_dir = os.path.dirname(os.path.abspath(__file__))
+    filename = os.path.join(this_dir,'webapp.log')
+    return filename
 
-    logfile = os.path.join(app.config['UPLOAD_FOLDER'],'logging.log')
-    handler = logging.FileHandler(logfile)
-    formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
-    handler.setFormatter(formatter)
-    app.logger.addHandler(handler)
-    app.logger.setLevel(logging.DEBUG)
+# customize the next lines
+application.config.from_mapping(
+    APP_NAME="OTSunWebApp Test",
+    UPLOAD_FOLDER = get_dir(),
+    MAIL_SENDER = "XXXXXX",
+    MAIL_USERNAME = 'XXXXXX',
+    MAIL_SERVER = None,
+    MAIL_PASSWD = 'XXXXX',
+    MAIL_PORT = 587
+)
 
-    return app(environ, start_response)
+file_handler = logging.FileHandler(get_file())
+file_handler.setLevel(logging.DEBUG)
+
+application.logger.setLevel(logging.DEBUG)
+application.logger.addHandler(file_handler)
