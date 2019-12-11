@@ -1,15 +1,17 @@
 * crear usuari webapp
-* fer directori /home/webapp/v1 i entrar
+* fer directori /home/webapp/vXXXX i entrar
 * baixar otsun i otsunwebapp 
 * fer virtualenv venv i activar
 * fer pip install -e els dos paquets otsun i otsunwebapp
-* copiar OTSunWebApp/sample_server.py a /home/webapp/v1/server.wsgi (i tunejar)
+* crear fitxer /home/webapp/vXXXX/venv/lib/python3.6/site-packages/freecad.pth
+i posar dins /usr/lib/freecad-python3/lib (o el que toqui)
+* copiar OTSunWebApp/sample_server.py a /home/webapp/vXXXX/server.wsgi (i tunejar)
 * posar dins del <VirtualHost *:80> de /etc/apache2/sites-available/000-default.conf
 la configuracio:
 --
-   WSGIDaemonProcess webappsunscene user=webapp group=webapp python-home=/home/webapp/v1/venv
-    WSGIScriptAlias /webappsunscene /home/webapp/v1/server.wsgi process-group=webappsunscene application-group=%{GLOBAL}
-    <Directory /home/webapp/v1>
+   WSGIDaemonProcess webappsunscene user=webapp group=webapp python-home=/home/webapp/vXXXX/venv
+    WSGIScriptAlias /webappsunscene /home/webapp/vXXXX/server.wsgi process-group=webappsunscene application-group=%{GLOBAL}
+    <Directory /home/webapp/vXXXX>
         WSGIApplicationGroup %{GLOBAL}
         WSGIProcessGroup webappsunscene
         Order deny,allow
