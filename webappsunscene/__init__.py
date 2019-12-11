@@ -14,7 +14,7 @@ import threading
 from werkzeug.utils import secure_filename
 # import processing_unit
 # from processing_unit import run_experiment, run_processor
-from materials import create_material
+from .materials import create_material
 import logging
 from autologging import TRACE
 import zipfile
