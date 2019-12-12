@@ -6,6 +6,7 @@
 * crear fitxer /home/webapp/vXXXX/venv/lib/python3.6/site-packages/freecad.pth
 i posar dins /usr/lib/freecad-python3/lib (o el que toqui)
 * copiar OTSunWebApp/sample_server.py a /home/webapp/vXXXX/server.wsgi (i tunejar)
+* copiar OTSunWebApp/recompute.py a /home/webapp/vXXXX/recompute.py
 * posar dins del <VirtualHost *:80> de /etc/apache2/sites-available/000-default.conf
 la configuracio:
 --
