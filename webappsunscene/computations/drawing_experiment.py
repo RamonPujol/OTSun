@@ -86,6 +86,11 @@ def computation(data, root_folder):
     w = wavelength
     light_spectrum = w
     main_direction = otsun.polar_to_cartesian(phi, theta) * -1.0  # Sun direction vector
+
+    if data.get('move_scene','no') == 'yes':
+        tracking = otsun.MultiTracking(main_direction, current_scene)
+        tracking.make_movements()
+
     emitting_region = otsun.SunWindow(current_scene, main_direction)
     l_s = otsun.LightSource(current_scene, emitting_region, light_spectrum, 1.0, direction_distribution,
                                polarization_vector)

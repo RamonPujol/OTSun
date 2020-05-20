@@ -37,6 +37,16 @@
             <input type="file" class="form-control-file" id="materials_file" name="materials_file">
         </div>
 
+    {% if data.scene_has_movement %}
+          <p>The FreeCAD file defines an scene with mobile objects. Do you want them to move with the sun?</p>
+        <div class="form-group">
+          <input type="radio" id="yes" name="move_scene" value="yes" required>
+          <label for="yes">Yes</label><br>
+          <input type="radio" id="no" name="move_scene" value="no">
+          <label for="no">No</label><br>
+        </div>
+    {% endif %}
+
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>
 {% endblock %}
