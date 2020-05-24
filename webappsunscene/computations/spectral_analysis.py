@@ -92,10 +92,18 @@ def computation(data, root_folder):
 
     statuslogger.total = number_of_runs
 
+    move_elements = data.get('move_scene','no') == 'yes'
+
+    main_direction = otsun.polar_to_cartesian(phi, theta) * -1.0  # Sun direction vector
+    emitting_region = otsun.SunWindow(current_scene, main_direction)
+
+    if move_elements:
+        tracking = otsun.MultiTracking(main_direction, current_scene)
+        tracking.make_movements()
+
+
     for w in np.arange(wavelength_ini, wavelength_end, wavelength_step):
         light_spectrum = w
-        main_direction = otsun.polar_to_cartesian(phi, theta) * -1.0  # Sun direction vector
-        emitting_region = otsun.SunWindow(current_scene, main_direction)
         l_s = otsun.LightSource(current_scene, emitting_region, light_spectrum, 1.0, direction_distribution,
                                    polarization_vector)
         exp = otsun.Experiment(current_scene, l_s, number_of_rays, show_in_doc)

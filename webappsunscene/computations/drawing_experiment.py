@@ -87,7 +87,9 @@ def computation(data, root_folder):
     light_spectrum = w
     main_direction = otsun.polar_to_cartesian(phi, theta) * -1.0  # Sun direction vector
 
-    if data.get('move_scene','no') == 'yes':
+    move_elements = data.get('move_scene','no') == 'yes'
+
+    if move_elements:
         tracking = otsun.MultiTracking(main_direction, current_scene)
         tracking.make_movements()
 

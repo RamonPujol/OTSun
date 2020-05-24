@@ -84,15 +84,24 @@ def computation(data, root_folder):
         for _ in np.arange(theta_ini, theta_end, theta_step):
             number_of_runs += 1
 
+    move_elements = data.get('move_scene', 'no') == 'yes'
+
+
     statuslogger.total = number_of_runs
     show_in_doc = None
     results = []
     for ph in np.arange(phi_ini, phi_end, phi_step):
         for th in np.arange(theta_ini, theta_end, theta_step):
             main_direction = otsun.polar_to_cartesian(ph, th) * -1.0  # Sun direction vector
+
+            if move_elements:
+                tracking = otsun.MultiTracking(main_direction, current_scene)
+                tracking.make_movements()
+
             emitting_region = otsun.SunWindow(current_scene, main_direction)
             l_s = otsun.LightSource(current_scene, emitting_region, light_spectrum, 1.0, direction_distribution,
                                        polarization_vector)
+
             exp = otsun.Experiment(current_scene, l_s, number_of_rays, show_in_doc)
             logger.info("launching experiment %s", [ph, th, main_direction])
             try:
@@ -111,7 +120,14 @@ def computation(data, root_folder):
             else:
                 efficiency_from_source_pv = 0.0
             results.append((ph, th, efficiency_from_source_th, efficiency_from_source_pv))
+
+            if move_elements:
+                tracking.undo_movements()
+
             statuslogger.increment()
+
+    if move_elements:
+        tracking.make_movements()
 
     power_emitted_by_m2 = otsun.integral_from_data_file(data_file_spectrum)
 
