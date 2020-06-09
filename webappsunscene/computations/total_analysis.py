@@ -11,13 +11,12 @@ from multiprocessing import Queue, Process, Manager, active_children
 from webappsunscene.utils.statuslogger import StatusLogger
 
 logger = logging.getLogger(__name__)
-data_consumer_queue = Queue()
 n_cpu = 20
 
 def data_consumer(common_data):
     data = []
     while True:
-        m = data_consumer_queue.get()
+        m = common_data['data_consumer_queue'].get()
         if m == 'kill':
             logger.info("Finished getting results")
             break
@@ -73,7 +72,7 @@ def compute(*args):
                 exp.number_of_rays / exp.light_source.emitting_region.aperture)
     else:
         efficiency_from_source_pv = 0.0
-    data_consumer_queue.put((ph, th, efficiency_from_source_th, efficiency_from_source_pv))
+    common_data['data_consumer_queue'].put((ph, th, efficiency_from_source_th, efficiency_from_source_pv))
 
     if common_data['move_elements']:
         tracking.undo_movements()
@@ -93,6 +92,9 @@ def computation(data, root_folder):
 
     manager = Manager()
     common_data['statuslogger'] = StatusLogger(manager, 0, root_folder)
+
+    common_data['data_consumer_queue'] = Queue()
+
 
     _ROOT = os.path.abspath(os.path.dirname(__file__))
 
@@ -208,6 +210,6 @@ def computation(data, root_folder):
     for p in processes:
         p.join()
     logger.info("Putting poison")
-    data_consumer_queue.put('kill')
+    common_data['data_consumer_queue'].put('kill')
     data_consumer_process.join()
 
