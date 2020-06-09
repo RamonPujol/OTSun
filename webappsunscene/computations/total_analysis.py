@@ -190,16 +190,19 @@ def computation(data, root_folder):
     #
 
     remaining = list_pars[:]
-    processes = []
+    active_processes = []
     while remaining:
-        free_slots = n_cpu - len(active_children())
+        for p in active_processes:
+            if not p.is_alive():
+                active_processes.remove(p)
+        free_slots = n_cpu - len(active_processes)
         # print(f"{free_slots} free slots")
         process_now = remaining[:free_slots]
         remaining = remaining[free_slots:]
         for args in process_now:
             p = Process(target=compute, args=args)
             p.start()
-            processes.append(p)
+            active_processes.append(p)
         time.sleep(0.1)
     logger.info("All tasks queued")
 
@@ -207,7 +210,7 @@ def computation(data, root_folder):
     # Finish computations and consumer
     #
 
-    for p in processes:
+    for p in active_processes:
         p.join()
     logger.info("Putting poison")
     common_data['data_consumer_queue'].put('kill')
