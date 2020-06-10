@@ -216,3 +216,5 @@ def computation(data, root_folder):
     common_data['data_consumer_queue'].put('kill')
     data_consumer_process.join()
 
+    FreeCAD.closeDocument(doc.Name)
+

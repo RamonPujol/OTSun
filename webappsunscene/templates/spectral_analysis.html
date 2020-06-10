@@ -52,14 +52,29 @@
         </div>
 
         <div class="form-group">
-            <label for="aperture_pv">Aperture collector for PV (in mm<sup>2</sup>).</label>
-            <div class="form-row" id="aperture_pv">
+            <label for="aperture_pv_div">Aperture collector for PV (in mm<sup>2</sup>).</label>
+            <div class="form-row" id="aperture_pv_div">
                 <div class="col">
                     <input type="text" class="form-control" placeholder="Value" id="aperture_pv" name="aperture_pv">
                 </div>
             </div>
         <small class="form-text text-muted">Leave it empty if there are no photovoltaic materials.</small>
         </div>
+
+        <div class="form-group ml-5" id="IQE_div" >
+            <label for="IQE">Internal Quantum Efficiency: Either a float or a file with values.</label>
+            <div class="form-row" id="IQE">
+                <div class="col">
+                    <input type="text" class="form-control" placeholder="Value" id="iqe_value" name="iqe_value">
+                </div>
+                <div class="col">
+                    <input type="file" class="form-control-file" id="iqe_file" name="iqe_file">
+                </div>
+            </div>
+            <small class="form-text text-muted">If the parameter Aperture PV above is empty, it will be ignored.</small>
+        </div>
+
+
 
         <div class="form-group">
             <label for="aperture_th">Aperture collector for thermal (in mm<sup>2</sup>).</label>
@@ -83,4 +98,42 @@
 
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>
+
+
+{% endblock %}
+
+{% block scripts %}
+    <script type="application/javascript">
+    $(document).ready(function () {
+        console.log('loaded')
+        if ($("#aperture_pv").val()=='') {
+            $("#iqe_value").prop("disabled", true);
+            $("#iqe_file").prop("disabled", true);
+            // $(".just-show").show();
+            // $("#IQE_div").hide("slow");
+            //$("#IQE_div").hide();
+        } else {
+            $("#iqe_value").prop("disabled", false);
+            $("#iqe_file").prop("disabled", false);
+        //    $("#IQE_div").collapse().show();
+            // $(".just-show").hide();
+            // $("#IQE_div").show("slow");
+        }
+        //return false;
+
+      $(document).on('change', '#aperture_pv', function() {
+          console.log('changedd');
+         if ($("#aperture_pv").val()=='') {
+             $("#iqe_value").prop("disabled", true);
+             $("#iqe_file").prop("disabled", true);
+             //$("#IQE_div").hide();
+        } else {
+             $("#iqe_value").prop("disabled", false);
+             $("#iqe_file").prop("disabled", false);
+             //$("#IQE_div").show();
+        }
+      });
+
+    });
+    </script>
 {% endblock %}

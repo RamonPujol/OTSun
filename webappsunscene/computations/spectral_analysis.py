@@ -138,8 +138,25 @@ def data_consumer(common_data):
         efficiency_from_source_PV = power_absorbed_from_source_PV / energy_emitted
 
         # iqe = internal_quantum_efficiency
-        # SR = otsun.spectral_response(table_PV, iqe)
-        # ph_cu = otsun.photo_current(SR, source_spectrum)
+        SR = otsun.spectral_response(table_PV_05, common_data['iqe'])
+        ph_cu = otsun.photo_current(SR, source_spectrum)
+
+        with open(os.path.join(common_data['destfolder'], 'PV_integral_spectrum.txt'), 'w') as outfile_PV_integral_spectrum:
+            outfile_PV_integral_spectrum.write("%s\n" % (
+                "#power_absorbed_from_source_PV irradiance_emitted(W/m2) efficiency_from_source_PV photocurrent(A/m2)"))
+            outfile_PV_integral_spectrum.write("%s %s %s %s" % (
+                power_absorbed_from_source_PV * common_data['aperture_collector_PV'] * 1E-6,
+                energy_emitted, efficiency_from_source_PV, ph_cu
+            ))
+            outfile_PV_integral_spectrum.flush()
+
+        np.savetxt(
+            os.path.join(common_data['destfolder'], 'spectral_response_PV-a.txt'),
+            SR, fmt=['%f', '%f']
+        )
+
+        # with open(os.path.join(destfolder, 'spectral_response_PV-a.txt'), 'w') as outfile_spectral_response_PV:
+        #     np.savetxt(outfile_spectral_response_PV, SR, fmt=['%f', '%f'])
 
         np.savetxt(
             os.path.join(common_data['destfolder'], 'PV_spectral_efficiency.txt'),
@@ -257,6 +274,11 @@ def computation(data, root_folder):
         common_data['aperture_collector_PV'] = 0
     else:
         common_data['aperture_collector_PV'] = float(data['aperture_pv'])
+        common_data['iqe'] = 1
+        if data.get('iqe_value', "") != "":
+            common_data['iqe'] = float(data['iqe_value'])
+        elif data.get('iqe_file', "") != "":
+            common_data['iqe'] = os.path.join(files_folder, data['iqe_file'])
 
     if data['aperture_th'] == "":
         common_data['aperture_collector_Th'] = 0
@@ -323,5 +345,7 @@ def computation(data, root_folder):
     logger.info("Putting poison")
     common_data['data_consumer_queue'].put('kill')
     data_consumer_process.join()
+
+    FreeCAD.closeDocument(doc.Name)
 
 
