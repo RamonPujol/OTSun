@@ -1,80 +1,30 @@
-import sys
-import otsun
 import logging
+import sys
 import os
 sys.path.append("/usr/lib/freecad")
 sys.path.append("/usr/lib/freecad/lib")
 import FreeCAD
+import otsun
 import numpy as np
-import multiprocessing
+import time
+from multiprocessing import Queue, Process, Manager
 from webappsunscene.utils.statuslogger import StatusLogger
 
 logger = logging.getLogger(__name__)
+n_cpu = 20
 
-def computation(data, root_folder):
-    global doc
-    global current_scene
 
-    manager = multiprocessing.Manager()
-    statuslogger = StatusLogger(manager, 0, root_folder)
+def data_consumer(common_data):
+    data = []
+    while True:
+        m = common_data['data_consumer_queue'].get()
+        if m == 'kill':
+            logger.info("Finished getting results")
+            break
+        logger.info(f"appending {m}")
+        data.append(m)
+    data.sort()
 
-    logger.info("experiment from spectral_analysis got called")
-    _ROOT = os.path.abspath(os.path.dirname(__file__))
-    data_file_spectrum = os.path.join(_ROOT, 'data', 'ASTMG173-direct.txt')
-    destfolder = os.path.join(root_folder, 'output')
-    try:
-        os.makedirs(destfolder)
-    except:
-        pass  # we suppose it already exists
-
-    polarization_vector = None
-    phi = float(data['phi'])
-    theta = float(data['theta'])
-    wavelength_ini = float(data['wavelength_ini'])
-    wavelength_end = float(data['wavelength_end']) + 1E-4
-    if data['wavelength_step'] == "":
-        wavelength_step = 1.0
-    else:
-        wavelength_step = float(data['wavelength_step'])
-
-    number_of_rays = int(data['numrays'])
-
-    if data['aperture_pv'] == "":
-        aperture_collector_PV = 0
-    else:
-        aperture_collector_PV = float(data['aperture_pv'])
-
-    if data['aperture_th'] == "":
-        aperture_collector_Th = 0
-    else:
-        aperture_collector_Th = float(data['aperture_th'])
-
-    # ---
-    # Inputs for Spectral Analysis
-    # ---
-    # for direction of the source two options: Buie model or main_direction
-    if data['CSR'] == "":
-        direction_distribution = None # default option main_direction
-    else:
-        CSR = float(data['CSR'])
-        Buie_model = otsun.buie_distribution(CSR)
-        direction_distribution = Buie_model
-    # --------- end
-
-    files_folder = os.path.join(root_folder, 'files')
-    freecad_file = os.path.join(files_folder, data['freecad_file'])
-    materials_file = os.path.join(files_folder, data['materials_file'])
-
-    otsun.Material.by_name = {}
-    otsun.Material.load_from_json_zip(materials_file)
-    doc = FreeCAD.openDocument(freecad_file)
-    show_in_doc = None
-    sel = doc.Objects
-    current_scene = otsun.Scene(sel)
-
-    # ---
-    # Magnitudes used for outputs in Spectral Analysis
-    # ---
     captured_energy_PV = 0.0
     captured_energy_Th = 0.0
     source_wavelength = []
@@ -84,64 +34,34 @@ def computation(data, root_folder):
     PV_energy = []
     PV_wavelength = []
     PV_values = []
-    # --------- end
 
-    number_of_runs = 0
-    for _ in np.arange(wavelength_ini, wavelength_end, wavelength_step):
-        number_of_runs += 1
-
-    statuslogger.total = number_of_runs
-
-    move_elements = data.get('move_scene','no') == 'yes'
-
-    main_direction = otsun.polar_to_cartesian(phi, theta) * -1.0  # Sun direction vector
-    emitting_region = otsun.SunWindow(current_scene, main_direction)
-
-    if move_elements:
-        tracking = otsun.MultiTracking(main_direction, current_scene)
-        tracking.make_movements()
-
-
-    for w in np.arange(wavelength_ini, wavelength_end, wavelength_step):
-        light_spectrum = w
-        l_s = otsun.LightSource(current_scene, emitting_region, light_spectrum, 1.0, direction_distribution,
-                                   polarization_vector)
-        exp = otsun.Experiment(current_scene, l_s, number_of_rays, show_in_doc)
-        logger.info("launching experiment %s", [w, main_direction])
-        try:
-            exp.run()
-        except:
-            logger.error("computation ended with an error")
-            continue
-        Th_energy.append(exp.Th_energy)
-        Th_wavelength.append(exp.Th_wavelength)
-        PV_energy.append(exp.PV_energy)
-        PV_wavelength.append(exp.PV_wavelength)
+    for data_line in data:
+        (w, exp_Th_energy, exp_Th_wavelength, exp_PV_energy, exp_PV_wavelength,
+        exp_PV_values, exp_points_absorber_Th, exp_captured_energy_Th, exp_captured_energy_PV) = data_line
+        Th_energy.append(exp_Th_energy)
+        Th_wavelength.append(exp_Th_wavelength)
+        PV_energy.append(exp_PV_energy)
+        PV_wavelength.append(exp_PV_wavelength)
         source_wavelength.append(w)
-        if exp.PV_values:
-            PV_values.append(exp.PV_values)
-        if exp.points_absorber_Th:
-            Th_points_absorber.append(exp.points_absorber_Th)
-        captured_energy_PV += exp.captured_energy_PV
-        captured_energy_Th += exp.captured_energy_Th
+        if exp_PV_values:
+            PV_values.append(exp_PV_values)
+        if exp_points_absorber_Th:
+            Th_points_absorber.append(exp_points_absorber_Th)
+        captured_energy_PV += exp_captured_energy_PV
+        captured_energy_Th += exp_captured_energy_Th
 
-        statuslogger.increment()
 
-    # ---
-    # Output file for wavelengths emitted by the source
-    # ---
-    data_source_wavelength = np.array(source_wavelength)
-    data_source_wavelength = data_source_wavelength.T
-    source_wavelengths_file = os.path.join(destfolder, 'source_wavelengths.txt')
+
+    source_wavelengths_file = os.path.join(common_data['destfolder'], 'source_wavelengths.txt')
     with open(source_wavelengths_file, 'w') as outfile_source_wavelengths:
         outfile_source_wavelengths.write(
-            "%s %s\n" % (aperture_collector_Th * 0.001 * 0.001, "# Collector Th aperture in m2"))
+            "%s %s\n" % (common_data['aperture_collector_Th'] * 0.001 * 0.001, "# Collector Th aperture in m2"))
         outfile_source_wavelengths.write(
-            "%s %s\n" % (aperture_collector_PV * 0.001 * 0.001, "# Collector PV aperture in m2"))
-        outfile_source_wavelengths.write("%s %s\n" % (wavelength_ini, "# Wavelength initial in nm"))
-        outfile_source_wavelengths.write("%s %s\n" % (wavelength_end, "# Wavelength final in nm"))
-        outfile_source_wavelengths.write("%s %s\n" % (wavelength_step, "# Step of wavelength in nm"))
-        outfile_source_wavelengths.write("%s %s\n" % (number_of_rays, "# Rays per wavelength"))
+            "%s %s\n" % (common_data['aperture_collector_PV'] * 0.001 * 0.001, "# Collector PV aperture in m2"))
+        outfile_source_wavelengths.write("%s %s\n" % (common_data['wavelength_ini'], "# Wavelength initial in nm"))
+        outfile_source_wavelengths.write("%s %s\n" % (common_data['wavelength_end'], "# Wavelength final in nm"))
+        outfile_source_wavelengths.write("%s %s\n" % (common_data['wavelength_step'], "# Step of wavelength in nm"))
+        outfile_source_wavelengths.write("%s %s\n" % (common_data['number_of_rays'], "# Rays per wavelength"))
         # np.savetxt(outfile_source_wavelengths, data_source_wavelength, fmt=['%f'])
 
     # --------- end
@@ -149,38 +69,54 @@ def computation(data, root_folder):
     # ---
     # Output source spectrum for calculation and total energy emitted
     # ---
-    source_spectrum = otsun.spectrum_to_constant_step(data_file_spectrum, 0.5, wavelength_ini, wavelength_end)
+    source_spectrum = otsun.spectrum_to_constant_step(common_data['data_file_spectrum'], 0.5, common_data['wavelength_ini'], common_data['wavelength_end'])
     energy_emitted = np.trapz(source_spectrum[:, 1], x=source_spectrum[:, 0])
     # --------- end
 
+    light_source = otsun.LightSource(common_data['current_scene'], common_data['emitting_region'],
+                                     1000.0, 1.0, common_data['direction_distribution'],common_data['polarization_vector'])
     # ---
     # Outputs for thermal absorber materials (Th) in Spectral Analysis
     # ---
     if captured_energy_Th > 1E-9:
         data_Th_points_absorber = np.array(np.concatenate(Th_points_absorber))
-        table_Th = otsun.make_histogram_from_experiment_results(Th_wavelength, Th_energy, wavelength_step,
-                                                                   aperture_collector_Th,
-                                                                   exp.light_source.emitting_region.aperture)
-        table_Th_05 = otsun.twoD_array_to_constant_step(table_Th, 0.5, wavelength_ini, wavelength_end)
+        table_Th = otsun.make_histogram_from_experiment_results(
+            Th_wavelength, Th_energy, common_data['wavelength_step'], common_data['aperture_collector_Th'],
+            light_source.emitting_region.aperture)
+        table_Th_05 = otsun.twoD_array_to_constant_step(table_Th, 0.5, common_data['wavelength_ini'], common_data['wavelength_end'])
         spectrum_by_table_Th_05 = source_spectrum[:, 1] * table_Th_05[:, 1]
         power_absorbed_from_source_Th = np.trapz(spectrum_by_table_Th_05, x=source_spectrum[:, 0])
         efficiency_from_source_Th = power_absorbed_from_source_Th / energy_emitted
 
-        with open(os.path.join(destfolder, 'Th_spectral_efficiency.txt'), 'w') as outfile_Th_spectral:
-            outfile_Th_spectral.write("%s\n" % ("#wavelength(nm) efficiency Th absorbed"))
-            np.savetxt(outfile_Th_spectral, table_Th, fmt=['%f', '%f'])
+        np.savetxt(
+            os.path.join(common_data['destfolder'], 'Th_spectral_efficiency.txt'),
+            table_Th,
+            fmt=['%f', '%f'],
+            header="#wavelength(nm) efficiency Th absorbed"
+        )
 
-        with open(os.path.join(destfolder, 'Th_points_absorber.txt'), 'w') as outfile_Th_points_absorber:
-            outfile_Th_points_absorber.write("%s\n" % (
-                "#energy_ray point_on_absorber[3] previous_point[3] normal_at_absorber_face[3]"))
-            np.savetxt(outfile_Th_points_absorber, data_Th_points_absorber,
-                       fmt=['%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f'])
+        # with open(os.path.join(common_data['destfolder'], 'Th_spectral_efficiency.txt'), 'w') as outfile_Th_spectral:
+        #     outfile_Th_spectral.write("%s\n" % ("#wavelength(nm) efficiency Th absorbed"))
+        #     np.savetxt(outfile_Th_spectral, table_Th, fmt=['%f', '%f'])
 
-        with open(os.path.join(destfolder, 'Th_integral_spectrum.txt'), 'w') as outfile_Th_integral_spectrum:
+        np.savetxt(
+            os.path.join(common_data['destfolder'], 'Th_points_absorber.txt'),
+            data_Th_points_absorber,
+            fmt=['%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f'],
+            header="#energy_ray point_on_absorber[3] previous_point[3] normal_at_absorber_face[3]"
+        )
+
+        # with open(os.path.join(common_data['destfolder'], 'Th_points_absorber.txt'), 'w') as outfile_Th_points_absorber:
+        #     outfile_Th_points_absorber.write("%s\n" % (
+        #         "#energy_ray point_on_absorber[3] previous_point[3] normal_at_absorber_face[3]"))
+        #     np.savetxt(outfile_Th_points_absorber, data_Th_points_absorber,
+        #                fmt=['%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f'])
+
+        with open(os.path.join(common_data['destfolder'], 'Th_integral_spectrum.txt'), 'w') as outfile_Th_integral_spectrum:
             outfile_Th_integral_spectrum.write("%s\n" % (
                 "#power_absorbed_from_source_Th irradiance_emitted(W/m2) efficiency_from_source_Th"))
             outfile_Th_integral_spectrum.write("%s %s %s\n" % (
-                power_absorbed_from_source_Th * aperture_collector_Th * 1E-6,
+                power_absorbed_from_source_Th * common_data['aperture_collector_Th'] * 1E-6,
                 energy_emitted,
                 efficiency_from_source_Th))
         # print power_absorbed_from_source_Th * aperture_collector_Th * 1E-6,
@@ -193,10 +129,10 @@ def computation(data, root_folder):
     # ---
     if captured_energy_PV > 1E-9:
         data_PV_values = np.array(np.concatenate(PV_values))
-        table_PV = otsun.make_histogram_from_experiment_results(PV_wavelength, PV_energy, wavelength_step,
-                                                                   aperture_collector_PV,
-                                                                   exp.light_source.emitting_region.aperture)
-        table_PV_05 = otsun.twoD_array_to_constant_step(table_PV, 0.5, wavelength_ini, wavelength_end)
+        table_PV = otsun.make_histogram_from_experiment_results(PV_wavelength, PV_energy, common_data['wavelength_step'],
+                                                                   common_data['aperture_collector_PV'],
+                                                                   light_source.emitting_region.aperture)
+        table_PV_05 = otsun.twoD_array_to_constant_step(table_PV, 0.5, common_data['wavelength_ini'], common_data['wavelength_end'])
         spectrum_by_table_PV_05 = source_spectrum[:, 1] * table_PV_05[:, 1]
         power_absorbed_from_source_PV = np.trapz(spectrum_by_table_PV_05, x=source_spectrum[:, 0])
         efficiency_from_source_PV = power_absorbed_from_source_PV / energy_emitted
@@ -205,30 +141,187 @@ def computation(data, root_folder):
         # SR = otsun.spectral_response(table_PV, iqe)
         # ph_cu = otsun.photo_current(SR, source_spectrum)
 
-        with open(os.path.join(destfolder, 'PV_spectral_efficiency.txt'), 'w') as outfile_PV_spectral:
-            outfile_PV_spectral.write("%s\n" % ("#wavelength(nm) efficiency_PV_absorbed"))
-            np.savetxt(outfile_PV_spectral, table_PV, fmt=['%f', '%f'])
+        np.savetxt(
+            os.path.join(common_data['destfolder'], 'PV_spectral_efficiency.txt'),
+            table_PV, fmt=['%f', '%f'],
+            header="#wavelength(nm) efficiency_PV_absorbed"
+        )
 
-        with open(os.path.join(destfolder, 'PV_paths_values.txt'), 'w') as outfile_PV_paths_values:
-            outfile_PV_paths_values.write("%s\n" % (
-                "#first_point_in_PV[3] second_point_in_PV[3] energy_ray_first_point energy_ray_second_point wavelength_ray(nm) absortion_coefficient_alpha(mm-1) incident_angle(deg.)"))
-            np.savetxt(outfile_PV_paths_values, data_PV_values,
-                       fmt=['%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f'])
+        # with open(os.path.join(common_data['destfolder'], 'PV_spectral_efficiency.txt'), 'w') as outfile_PV_spectral:
+        #     outfile_PV_spectral.write("%s\n" % ("#wavelength(nm) efficiency_PV_absorbed"))
+        #     np.savetxt(outfile_PV_spectral, table_PV, fmt=['%f', '%f'])
 
-        # with open(os.path.join(destfolder, 'spectral_response_PV-a.txt'), 'w') as outfile_spectral_response_PV:
-         #   np.savetxt(outfile_spectral_response_PV, SR, fmt=['%f', '%f'])
+        np.savetxt(
+            os.path.join(common_data['destfolder'], 'PV_paths_values.txt'),
+            data_PV_values,
+            fmt=['%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f'],
+            header="#first_point_in_PV[3] second_point_in_PV[3] energy_ray_first_point energy_ray_second_point wavelength_ray(nm) absortion_coefficient_alpha(mm-1) incident_angle(deg.)"
+        )
 
-        #with open(os.path.join(destfolder, 'PV_integral_spectrum-a.txt'), 'w') as outfile_PV_integral_spectrum:
-        #    outfile_PV_integral_spectrum.write("%s %s %s %s\n" % (
-        #        "# power_absorbed_from_source_PV;   ", "energy_emitted;   ", "efficiency_from_source_PV;   ",
-        #        "photocurrent (A/m2);   "))
-        #    outfile_PV_integral_spectrum.write("%s %s %s\n" % (
-        #        power_absorbed_from_source_PV * aperture_pv * 1E-6,
-        #        energy_emitted * exp.light_source.emitting_region.aperture * 1E-6,
-        #        efficiency_from_source_PV))
-        # print power_absorbed_from_source_PV * aperture_collector_PV * 1E-6,
-        # energy_emitted * exp.light_source.emitting_region.aperture * 1E-6, efficiency_from_source_PV, ph_cu
+        # with open(os.path.join(common_data['destfolder'], 'PV_paths_values.txt'), 'w') as outfile_PV_paths_values:
+        #     outfile_PV_paths_values.write("%s\n" % (
+        #         "#first_point_in_PV[3] second_point_in_PV[3] energy_ray_first_point energy_ray_second_point wavelength_ray(nm) absortion_coefficient_alpha(mm-1) incident_angle(deg.)"))
+        #     np.savetxt(outfile_PV_paths_values, data_PV_values,
+        #                fmt=['%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f'])
 
-    # --------- end
-    # t4 = time.time()
-    # print t4 - t3
+
+def compute(*args):
+    w, common_data = args
+
+    l_s = otsun.LightSource(common_data['current_scene'], common_data['emitting_region'],
+                                     w, 1.0, common_data['direction_distribution'],common_data['polarization_vector'])
+
+    exp = otsun.Experiment(common_data['current_scene'], l_s, common_data['number_of_rays'],
+                           common_data['show_in_doc'])
+    logger.info("launching experiment %s", [w, common_data['main_direction']])
+    try:
+        exp.run()
+    except:
+        logger.error("computation ended with an error")
+        return
+    common_data['data_consumer_queue'].put((
+        w, exp.Th_energy, exp.Th_wavelength, exp.PV_energy, exp.PV_wavelength,
+        exp.PV_values, exp.points_absorber_Th, exp.captured_energy_Th, exp.captured_energy_PV
+    ))
+
+    common_data['statuslogger'].increment()
+
+
+def computation(data, root_folder):
+
+    logger.info("experiment from spectral_analysis got called")
+
+    common_data = {}
+
+    manager = Manager()
+    common_data['statuslogger'] = StatusLogger(manager, 0, root_folder)
+
+    common_data['data_consumer_queue'] = Queue()
+
+    #
+    # Load document and materials
+    #
+
+    files_folder = os.path.join(root_folder, 'files')
+    freecad_file = os.path.join(files_folder, data['freecad_file'])
+    materials_file = os.path.join(files_folder, data['materials_file'])
+
+    otsun.Material.by_name = {}
+    otsun.Material.load_from_json_zip(materials_file)
+
+    #
+    # Load parameters from user input
+    #
+
+    common_data['phi'] = float(data['phi'])
+    common_data['theta'] = float(data['theta'])
+    common_data['wavelength_ini'] = float(data['wavelength_ini'])
+    common_data['wavelength_end'] = float(data['wavelength_end']) + 1E-4
+    if data['wavelength_step'] == "":
+        common_data['wavelength_step'] = 1.0
+    else:
+        common_data['wavelength_step'] = float(data['wavelength_step'])
+
+    #
+    # Prepare common data
+    #
+
+    _ROOT = os.path.abspath(os.path.dirname(__file__))
+
+    common_data['data_file_spectrum'] = os.path.join(_ROOT, 'data', 'ASTMG173-direct.txt')
+    common_data['light_spectrum'] = otsun.cdf_from_pdf_file(common_data['data_file_spectrum'])
+
+    common_data['destfolder'] = os.path.join(root_folder, 'output')
+    try:
+        os.makedirs(common_data['destfolder'])
+    except:
+        pass  # we suppose it already exists
+
+    if data['CSR'] == "":
+        common_data['direction_distribution'] = None # default option main_direction
+    else:
+        CSR = float(data['CSR'])
+        Buie_model = otsun.buie_distribution(CSR)
+        common_data['direction_distribution'] = Buie_model
+
+    doc = FreeCAD.openDocument(freecad_file)
+    sel = doc.Objects
+
+    common_data['current_scene'] = otsun.Scene(sel)
+
+    common_data['show_in_doc'] = None
+
+    common_data['number_of_rays'] = int(data['numrays'])
+
+    if data['aperture_pv'] == "":
+        common_data['aperture_collector_PV'] = 0
+    else:
+        common_data['aperture_collector_PV'] = float(data['aperture_pv'])
+
+    if data['aperture_th'] == "":
+        common_data['aperture_collector_Th'] = 0
+    else:
+        common_data['aperture_collector_Th'] = float(data['aperture_th'])
+
+    common_data['move_elements'] = data.get('move_scene', 'no') == 'yes'
+
+    common_data['polarization_vector'] = None
+
+    common_data['main_direction'] = otsun.polar_to_cartesian(common_data['phi'], common_data['theta']) * -1.0  # Sun direction vector
+    common_data['emitting_region'] = otsun.SunWindow(common_data['current_scene'], common_data['main_direction'])
+
+    if common_data['move_elements']:
+        tracking = otsun.MultiTracking(common_data['main_direction'], common_data['current_scene'])
+        tracking.make_movements()
+
+    #
+    # Prepare computations
+    #
+
+
+    list_pars = []
+
+    for w in np.arange(common_data['wavelength_ini'], common_data['wavelength_end'], common_data['wavelength_step']):
+        list_pars.append((w, common_data))
+
+    common_data['statuslogger'].total = len(list_pars)
+
+    #
+    # Prepare consumer
+    #
+
+    data_consumer_process = Process(target=data_consumer, args=(common_data,))
+    data_consumer_process.start()
+
+    #
+    # Launch computations
+    #
+
+    remaining = list_pars[:]
+    active_processes = []
+    while remaining:
+        for p in active_processes:
+            if not p.is_alive():
+                active_processes.remove(p)
+        free_slots = n_cpu - len(active_processes)
+        # print(f"{free_slots} free slots")
+        process_now = remaining[:free_slots]
+        remaining = remaining[free_slots:]
+        for args in process_now:
+            p = Process(target=compute, args=args)
+            p.start()
+            active_processes.append(p)
+        time.sleep(0.1)
+    logger.info("All tasks queued")
+
+    #
+    # Finish computations and consumer
+    #
+
+    for p in active_processes:
+        p.join()
+    logger.info("Putting poison")
+    common_data['data_consumer_queue'].put('kill')
+    data_consumer_process.join()
+
+

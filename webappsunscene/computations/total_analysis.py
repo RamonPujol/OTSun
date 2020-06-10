@@ -7,7 +7,7 @@ import FreeCAD
 import otsun
 import numpy as np
 import time
-from multiprocessing import Queue, Process, Manager, active_children
+from multiprocessing import Queue, Process, Manager
 from webappsunscene.utils.statuslogger import StatusLogger
 
 logger = logging.getLogger(__name__)
